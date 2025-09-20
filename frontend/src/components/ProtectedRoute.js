@@ -1,8 +1,7 @@
-// src/components/ProtectedRoute.js
-import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
-
-export default function ProtectedRoute() {
-  const isAuthenticated = true; // Replace with your auth logic
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
+try {
+  const res = await registerUser(form);
+  alert(res.data.msg); // "User registered successfully ✅"
+  navigate("/login");  // Redirect to login page
+} catch (err) {
+  alert(err.response?.data?.msg || "❌ Registration failed");
 }
