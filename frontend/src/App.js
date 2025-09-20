@@ -3,6 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -23,6 +25,8 @@ function App() {
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/coding" element={<CodingRound />} />
           <Route path="/mcq" element={<McqRound />} />
