@@ -1,11 +1,10 @@
 // src/components/Navbar.js
 import React from "react";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Button from "@mui/material/Button";
-import { Link, useNavigate } from "react-router-dom";
+import { AppBar, Toolbar, Button } from "@mui/material";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
+  const location = useLocation();
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem("token");
 
@@ -14,8 +13,14 @@ export default function Navbar() {
     navigate("/login");
   };
 
+  // If on home page → transparent navbar
+  const isHome = location.pathname === "/";
+  const navbarStyle = isHome
+    ? { background: "transparent", boxShadow: "none", position: "absolute" }
+    : { background: "#1976d2" };
+
   return (
-    <AppBar position="static" sx={{ background: "#1976d2" }}>
+    <AppBar position="static" style={navbarStyle}>
       <Toolbar>
         <Button color="inherit" component={Link} to="/">Home</Button>
         {isLoggedIn && (
