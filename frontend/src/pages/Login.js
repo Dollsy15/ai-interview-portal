@@ -1,21 +1,29 @@
+// src/pages/Login.js
 import React, { useState } from "react";
+import { TextField, Button, Paper, Typography } from "@mui/material";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email,setEmail] = useState("");
+  const [password,setPassword] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ email, password });
-    // Later we'll call backend login API
+    localStorage.setItem("token", "dummyToken");
+    window.location.href = "/dashboard";
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>Login</h2>
-      <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} /><br />
-      <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} /><br />
-      <button type="submit">Login</button>
-    </form>
+    <Paper elevation={3} sx={{ p:4, maxWidth:400, mx:"auto", mt:8 }}>
+      <Typography variant="h5" textAlign={"center"} gutterBottom>Login</Typography>
+      <form onSubmit={handleSubmit}>
+        <TextField 
+          fullWidth label="Email" margin="normal"
+          value={email} onChange={(e)=>setEmail(e.target.value)} />
+        <TextField 
+          fullWidth type="password" label="Password" margin="normal"
+          value={password} onChange={(e)=>setPassword(e.target.value)} />
+        <Button type="submit" variant="contained" fullWidth sx={{mt:2}}>Login</Button>
+      </form>
+    </Paper>
   );
 }

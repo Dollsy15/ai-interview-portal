@@ -7,7 +7,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CodingRound from "./pages/CodingRound";
 import McqRound from "./pages/McqRound";
-import BehaviorRound from "./pages/BehaviorRound";
+import BehaviorRound from "./pages/BehavioralRound";
 
 function App() {
   return (
