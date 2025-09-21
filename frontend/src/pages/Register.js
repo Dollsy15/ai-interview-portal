@@ -15,10 +15,15 @@ export default function Register() {
     e.preventDefault();
     try {
       const res = await registerUser(form);
-      alert(res.data.msg); // "User registered successfully ✅"
+
+      // smart handling: agar res.data hai to use lo, warna res lo
+      const data = res.data ? res.data : res;
+
+      alert(data.msg || "✅ Registered successfully!");
       navigate("/login");
     } catch (err) {
       alert(err.response?.data?.msg || "❌ Registration failed");
+      console.error("Register error:", err);
     }
   };
 
@@ -26,7 +31,7 @@ export default function Register() {
     <div
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1650&q=80')", // futuristic AI bg
+          "url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1650&q=80')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         height: "100vh",
