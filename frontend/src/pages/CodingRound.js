@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Paper, Button, Typography } from "@mui/material";
+import Timer from "../components/Timer";
 
 export default function CodingRound() {
   const question = "Write a function to reverse a string in JavaScript.";
@@ -9,9 +10,19 @@ export default function CodingRound() {
   // Your code here
 }`);
   const [output, setOutput] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const runCode = () => {
     setOutput("✅ Code submitted! (Will connect with Judge0 API later)");
+    setSubmitted(true);
+  };
+
+  const handleAutoSubmit = () => {
+    if (!submitted) {
+      setOutput("⏰ Time is up! Auto-submitting your code...");
+      setSubmitted(true);
+      // Later yahan backend API submit call bhi kar sakte ho
+    }
   };
 
   return (
@@ -38,6 +49,10 @@ export default function CodingRound() {
           borderRadius: "12px",
         }}
       >
+        {/* Timer Above */}
+        <Timer duration={10 * 60} onTimeUp={handleAutoSubmit} />
+        {/* duration = 600 sec (10 min). Change to 30*60 for 30min */}
+
         <Typography variant="h5" gutterBottom fontWeight="bold">
           Coding Question 💻
         </Typography>
@@ -50,6 +65,7 @@ export default function CodingRound() {
           theme="vs-dark"
           value={code}
           onChange={(val) => setCode(val || "")}
+          options={{ readOnly: submitted }} // disable editor if submitted
         />
 
         <Button
@@ -57,6 +73,7 @@ export default function CodingRound() {
           color="primary"
           sx={{ mt: 2 }}
           onClick={runCode}
+          disabled={submitted}
         >
           Run Code
         </Button>
