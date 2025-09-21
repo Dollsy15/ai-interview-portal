@@ -65,6 +65,11 @@ export const getMcqQuestions = async () => {
   return res.data;
 };
 
+// API helper function
+export const submitCodingAnswer = async (data) => {
+  return axios.post("http://localhost:5000/api/coding/submit", data);
+};
+
 // Example for future coding questions
 // export const getCodingQuestions = async () => {
 //   const res = await API.get("/coding");
