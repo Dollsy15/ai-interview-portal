@@ -15,6 +15,7 @@ export default function Mcq() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [answers, setAnswers] = useState({}); // {questionId: selectedOption}
+  const [score, setScore] = useState(null); // ✅ store final score
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -35,9 +36,16 @@ export default function Mcq() {
   };
 
   const handleSubmit = () => {
+    let newScore = 0;
+
+    questions.forEach((q) => {
+      if (answers[q._id] === q.answer) {
+        newScore++;
+      }
+    });
+
+    setScore(newScore);
     console.log("User Answers:", answers);
-    alert("Answers submitted! (Check console for details)");
-    // ✅ Future: send answers to backend for evaluation
   };
 
   if (loading)
@@ -79,6 +87,12 @@ export default function Mcq() {
       <Button variant="contained" color="primary" onClick={handleSubmit}>
         Submit Answers
       </Button>
+
+      {score !== null && (
+        <Typography variant="h6" textAlign="center" sx={{ mt: 2 }}>
+          🎉 You scored {score} out of {questions.length}
+        </Typography>
+      )}
     </Stack>
   );
 }

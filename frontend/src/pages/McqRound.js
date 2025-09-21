@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Paper,
   Typography,
@@ -7,94 +7,100 @@ import {
   FormControlLabel,
   Radio,
 } from "@mui/material";
+import { getMcqQuestions, addUserScore } from "../api";
+import { useNavigate } from "react-router-dom";
 
 export default function McqRound() {
-  const questions = [
-    {
-      id: 1,
-      question: "What is the time complexity of binary search?",
-      options: ["O(n)", "O(log n)", "O(n log n)", "O(1)"],
-      answer: "O(log n)",
-    },
-    {
-      id: 2,
-      question: "Which one is a NoSQL database?",
-      options: ["MySQL", "MongoDB", "PostgreSQL", "Oracle"],
-      answer: "MongoDB",
-    },
-  ];
+  const [questions, setQuestions] = useState([]); // fetched questions
+  const [answers, setAnswers] = useState({}); // selected answers
+  const [score, setScore] = useState(null); // final score
+  const navigate = useNavigate();
 
-  const [answers, setAnswers] = useState({});
-  const [score, setScore] = useState(null);
+  // ✅ Fetch MCQ questions on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getMcqQuestions();
+        setQuestions(data);
+      } catch (err) {
+        console.error("❌ Error fetching MCQs:", err);
+      }
+    })();
+  }, []);
 
-  const handleSubmit = () => {
-    let sc = 0;
-    questions.forEach((q) => {
-      if (answers[q.id] === q.answer) sc++;
+  // Handle user selecting an answer
+  const handleChange = (qIndex, value) => {
+    setAnswers({ ...answers, [qIndex]: parseInt(value) });
+  };
+
+  // Handle submit quiz
+  const handleSubmit = async () => {
+    let calcScore = 0;
+    questions.forEach((q, index) => {
+      if (answers[index] === q.answer) calcScore += 10; // ✅ 10 marks per correct ans
     });
-    setScore(sc);
+
+    setScore(calcScore);
+
+    try {
+      // ✅ Save score to DB
+      await addUserScore("mcq", calcScore);
+      alert(`Your MCQ Score: ${calcScore}`);
+      navigate("/dashboard"); // ✅ go back to Dashboard
+    } catch (err) {
+      console.error("❌ Failed to save MCQ score:", err);
+    }
   };
 
   return (
     <div
       style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1513258496099-48168024aec0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1650&q=80')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
         minHeight: "100vh",
+        background: "#f9f9f9",
+        padding: "2rem",
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
-        padding: "2rem",
       }}
     >
-      <Paper
-        elevation={6}
-        sx={{
-          p: 4,
-          maxWidth: 600,
-          width: "100%",
-          background: "rgba(255,255,255,0.95)", // semi-transparent so bg isn't distracting
-          borderRadius: "12px",
-        }}
-      >
-        <Typography variant="h5" gutterBottom fontWeight="bold">
-          MCQ Round 📝
+      <Paper sx={{ p: 4, width: "100%", maxWidth: 700 }}>
+        <Typography variant="h4" gutterBottom>
+          MCQ Round
         </Typography>
 
-        {questions.map((q) => (
-          <div key={q.id} style={{ marginBottom: "1.5rem" }}>
-            <Typography sx={{ mb: 1, fontWeight: "500" }}>{q.question}</Typography>
-            <RadioGroup
-              value={answers[q.id] || ""}
-              onChange={(e) =>
-                setAnswers({ ...answers, [q.id]: e.target.value })
-              }
+        {score === null ? (
+          <>
+            {questions.map((q, index) => (
+              <div key={index} style={{ marginBottom: "1.5rem" }}>
+                <Typography variant="h6">
+                  {index + 1}. {q.question}
+                </Typography>
+                <RadioGroup
+                  value={answers[index] ?? ""}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                >
+                  {q.options.map((opt, i) => (
+                    <FormControlLabel
+                      key={i}
+                      value={i}
+                      control={<Radio />}
+                      label={opt}
+                    />
+                  ))}
+                </RadioGroup>
+              </div>
+            ))}
+
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSubmit}
+              sx={{ mt: 2 }}
             >
-              {q.options.map((o) => (
-                <FormControlLabel
-                  key={o}
-                  value={o}
-                  control={<Radio />}
-                  label={o}
-                />
-              ))}
-            </RadioGroup>
-          </div>
-        ))}
-
-        <Button variant="contained" onClick={handleSubmit}>
-          Submit
-        </Button>
-
-        {score !== null && (
-          <Typography
-            variant="h6"
-            sx={{ mt: 3, fontWeight: "bold", textAlign: "center" }}
-          >
-            Your Score: {score}/{questions.length}
-          </Typography>
+              Submit
+            </Button>
+          </>
+        ) : (
+          <Typography variant="h5">✅ You scored {score} marks 🎉</Typography>
         )}
       </Paper>
     </div>
