@@ -6,7 +6,7 @@ const { mongoURI } = require("./config"); // MongoDB connection URI
 
 // Routes
 const authRoutes = require("./routes/auth");
-const mcqRoutes = require("./routes/mcq"); // ✅ MCQ route
+const mcqRoutes = require("./src/routes/mcq"); // ✅ MCQ route
 
 const app = express();
 
