@@ -7,6 +7,7 @@ const { mongoURI } = require("./config"); // MongoDB connection URI
 // Routes
 const authRoutes = require("./routes/auth");
 const mcqRoutes = require("./routes/mcq"); // ✅ MCQ route
+const codingRoutes = require("./routes/coding"); // ✅ Added Coding Round route
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.json()); // Parse JSON requests
 // ===========================
 app.use("/api/auth", authRoutes);
 app.use("/api/mcq", mcqRoutes);
+app.use("/api/coding", codingRoutes); // ✅ New Coding Round route
 
 // ===========================
 // MongoDB Connection
