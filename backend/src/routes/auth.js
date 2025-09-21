@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { jwtSecret } = require("../config");
+const authMiddleware = require("../middleware/authMiddleware"); // ✅ add middleware for protected routes
 
 // Register
 router.post("/register", async (req, res) => {
@@ -40,8 +41,27 @@ router.post("/login", async (req, res) => {
 
     res.json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ✅ Get Logged-in User
+router.get("/me", authMiddleware, async (req, res) => {
+  try {
+    // authMiddleware ne req.user set kiya hoga
+    // agar tum chahti ho DB call safe ho to User lookup kar sakti ho:
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    res.json({ user });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
