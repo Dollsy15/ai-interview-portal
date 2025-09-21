@@ -5,7 +5,7 @@ function Timer({ duration, onTimeUp }) {
 
   useEffect(() => {
     if (timeLeft <= 0) {
-      onTimeUp(); // trigger auto submit
+      onTimeUp();
       return;
     }
 

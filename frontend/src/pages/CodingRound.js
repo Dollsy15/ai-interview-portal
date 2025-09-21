@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Paper, Button, Typography } from "@mui/material";
 import Timer from "../components/Timer";
+import { submitCodingAnswer } from "../api";
 
 export default function CodingRound() {
   const question = "Write a function to reverse a string in JavaScript.";
@@ -12,16 +13,25 @@ export default function CodingRound() {
   const [output, setOutput] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const runCode = () => {
-    setOutput("✅ Code submitted! (Will connect with Judge0 API later)");
-    setSubmitted(true);
+  const handleSubmit = async () => {
+    try {
+      const response = await submitCodingAnswer({
+        code,
+        userId: "123", // later replace with logged-in user
+      });
+
+      setOutput(response.data.message);
+      setSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      setOutput("❌ Failed to submit code");
+    }
   };
 
   const handleAutoSubmit = () => {
     if (!submitted) {
       setOutput("⏰ Time is up! Auto-submitting your code...");
-      setSubmitted(true);
-      // Later yahan backend API submit call bhi kar sakte ho
+      handleSubmit();
     }
   };
 
@@ -49,33 +59,32 @@ export default function CodingRound() {
           borderRadius: "12px",
         }}
       >
-        {/* Timer Above */}
+        {/* Timer */}
         <Timer duration={10 * 60} onTimeUp={handleAutoSubmit} />
-        {/* duration = 600 sec (10 min). Change to 30*60 for 30min */}
 
         <Typography variant="h5" gutterBottom fontWeight="bold">
           Coding Question 💻
         </Typography>
         <Typography sx={{ mb: 3, color: "#444" }}>{question}</Typography>
 
-        {/* Monaco Code Editor */}
+        {/* Monaco Editor */}
         <Editor
           height="300px"
           defaultLanguage="javascript"
           theme="vs-dark"
           value={code}
           onChange={(val) => setCode(val || "")}
-          options={{ readOnly: submitted }} // disable editor if submitted
+          options={{ readOnly: submitted }}
         />
 
         <Button
           variant="contained"
           color="primary"
           sx={{ mt: 2 }}
-          onClick={runCode}
+          onClick={handleSubmit}
           disabled={submitted}
         >
-          Run Code
+          Submit Code
         </Button>
 
         {output && (

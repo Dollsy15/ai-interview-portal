@@ -1,6 +1,5 @@
 // src/App.js
 import React from "react";
-import { Routes, Route } from "react-router-dom";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -18,26 +17,30 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
-    <div className="App">
-      <Navbar />
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+    <Router>
+      <div className="App">
+        <Navbar />
+        <div style={{ minHeight: "80vh" }}>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-        {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/coding" element={<CodingRound />} />
-          <Route path="/mcq" element={<McqRound />} />
-          <Route path="/behavioral" element={<BehavioralRound />} />
-        </Route>
-      </Routes>
-      <Footer />
-    </div>
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/coding" element={<CodingRound />} />
+              <Route path="/mcq" element={<McqRound />} />
+              <Route path="/behavioral" element={<BehavioralRound />} />
+            </Route>
+          </Routes>
+        </div>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
