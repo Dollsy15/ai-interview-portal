@@ -16,7 +16,7 @@ export default function Navbar() {
   return (
     <AppBar position="static" sx={{ background: "#1976d2" }}>
       <Toolbar>
-        {/* Links always visible */}
+        {/* Always visible (Public links) */}
         <Button color="inherit" component={Link} to="/">
           Home
         </Button>
@@ -27,7 +27,7 @@ export default function Navbar() {
           Contact
         </Button>
 
-        {/* Show Login/Register if not authenticated */}
+        {/* If NOT logged in → Login/Register buttons */}
         {!token && (
           <>
             <Button color="inherit" component={Link} to="/login">
@@ -39,11 +39,20 @@ export default function Navbar() {
           </>
         )}
 
-        {/* Show Dashboard + Logout if authenticated */}
+        {/* ✅ If logged in → Show Dashboard + rounds + Logout */}
         {token && (
           <>
             <Button color="inherit" component={Link} to="/dashboard">
               Dashboard
+            </Button>
+            <Button color="inherit" component={Link} to="/coding">
+              Coding
+            </Button>
+            <Button color="inherit" component={Link} to="/mcq">
+              MCQ
+            </Button>
+            <Button color="inherit" component={Link} to="/behavioral">
+              Behavioral
             </Button>
             <Button color="inherit" onClick={handleLogout}>
               Logout
