@@ -1,6 +1,6 @@
 // src/pages/Dashboard.js
-import React from "react";
-import { Paper, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Paper, Typography, Divider } from "@mui/material";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -12,10 +12,33 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { getUserProfile } from "../api"; // 👈 protected API helper
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default function Dashboard() {
+  const [user, setUser] = useState(null);
+
+  // ✅ Fetch user profile when dashboard loads
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getUserProfile(); // automatically sends token
+        setUser(data.user); // assuming backend responds with { user: { name, email, role } }
+      } catch (err) {
+        console.error("Failed to fetch profile:", err.response?.data);
+      }
+    })();
+  }, []);
+
   const data = {
     labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
     datasets: [
@@ -62,6 +85,17 @@ export default function Dashboard() {
         <Typography variant="h5" textAlign="center" gutterBottom>
           Your Progress 📊
         </Typography>
+
+        {/* ✅ Show user info */}
+        {user && (
+          <div style={{ marginBottom: "1rem", textAlign: "center" }}>
+            <Typography variant="h6">Welcome, {user.name} 👋</Typography>
+            <Typography variant="body2">Email: {user.email}</Typography>
+            <Typography variant="body2">Role: {user.role}</Typography>
+            <Divider sx={{ my: 2 }} />
+          </div>
+        )}
+
         <Line data={data} />
       </Paper>
     </div>
