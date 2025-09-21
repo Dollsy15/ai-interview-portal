@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-// ✅ Static MCQ questions for AI Interview Portal
+// ✅ Static MCQ questions
 const mcqQuestions = [
   {
     _id: "q1",
@@ -53,6 +53,23 @@ const mcqQuestions = [
 // ✅ GET /api/mcq → return questions
 router.get("/", (req, res) => {
   res.json(mcqQuestions);
+});
+
+// ✅ POST /api/mcq/submit → evaluate answers
+router.post("/submit", (req, res) => {
+  const { answers } = req.body; // { q1: "Python", q2: "..." }
+  let score = 0;
+
+  mcqQuestions.forEach((q) => {
+    if (answers[q._id] && answers[q._id] === q.answer) {
+      score++;
+    }
+  });
+
+  res.json({
+    total: mcqQuestions.length,
+    score,
+  });
 });
 
 module.exports = router;
