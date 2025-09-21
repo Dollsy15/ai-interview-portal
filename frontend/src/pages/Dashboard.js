@@ -30,39 +30,49 @@ export default function Dashboard() {
     (async () => {
       try {
         const data = await getUserProfile();
-        console.log("Profile data from API:", data);
+        console.log("✅ Profile data from API:", data);
 
-        // ✅ Fix: response me `user` key hai, usko state me set karo
         if (data.user) {
           setUser(data.user);
         } else {
-          setUser(data); // fallback
+          setUser(data);
         }
       } catch (err) {
-        console.error("❌ Failed to fetch profile:", err.response?.data);
+        console.error("❌ Fetch profile error:", err.response?.data);
       }
     })();
   }, []);
 
-  const chartData = {
-    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-    datasets: [
-      {
-        label: "Coding Scores",
-        data: [40, 60, 75, 90],
-        borderColor: "blue",
-        borderWidth: 2,
-        tension: 0.3,
-      },
-      {
-        label: "MCQ Scores",
-        data: [50, 65, 70, 85],
-        borderColor: "green",
-        borderWidth: 2,
-        tension: 0.3,
-      },
-    ],
-  };
+  // ✅ SAFE: optional chaining + defaults [] prevent crash
+  const chartData = user
+    ? {
+        labels: Array.from(
+          {
+            length: Math.max(
+              user?.scores?.mcq?.length || 0,
+              user?.scores?.coding?.length || 0
+            ),
+          },
+          (_, i) => `Test ${i + 1}`
+        ),
+        datasets: [
+          {
+            label: "MCQ Scores",
+            data: user?.scores?.mcq || [],
+            borderColor: "green",
+            borderWidth: 2,
+            tension: 0.3,
+          },
+          {
+            label: "Coding Scores",
+            data: user?.scores?.coding || [],
+            borderColor: "blue",
+            borderWidth: 2,
+            tension: 0.3,
+          },
+        ],
+      }
+    : { labels: [], datasets: [] };
 
   return (
     <div
