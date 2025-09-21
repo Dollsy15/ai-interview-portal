@@ -1,4 +1,3 @@
-// src/pages/Dashboard.js
 import React, { useEffect, useState } from "react";
 import { Paper, Typography, Divider } from "@mui/material";
 import { Line } from "react-chartjs-2";
@@ -12,7 +11,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { getUserProfile } from "../api"; // 👈 protected API helper
+import { getUserProfile } from "../api";
 
 ChartJS.register(
   CategoryScale,
@@ -27,32 +26,39 @@ ChartJS.register(
 export default function Dashboard() {
   const [user, setUser] = useState(null);
 
-  // ✅ Fetch current user profile on load
   useEffect(() => {
     (async () => {
       try {
-        const data = await getUserProfile(); // auto-includes token via interceptor
-        setUser(data.user);
+        const data = await getUserProfile();
+        console.log("Profile data from API:", data);
+
+        // ✅ Fix: response me `user` key hai, usko state me set karo
+        if (data.user) {
+          setUser(data.user);
+        } else {
+          setUser(data); // fallback
+        }
       } catch (err) {
         console.error("❌ Failed to fetch profile:", err.response?.data);
       }
     })();
   }, []);
 
-  // Demo progress data (replace with dynamic later)
-  const data = {
+  const chartData = {
     labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
     datasets: [
       {
         label: "Coding Scores",
         data: [40, 60, 75, 90],
         borderColor: "blue",
+        borderWidth: 2,
         tension: 0.3,
       },
       {
         label: "MCQ Scores",
         data: [50, 65, 70, 85],
         borderColor: "green",
+        borderWidth: 2,
         tension: 0.3,
       },
     ],
@@ -62,7 +68,7 @@ export default function Dashboard() {
     <div
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1650&q=80')",
+          "url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1650&q=80')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         minHeight: "100vh",
@@ -86,7 +92,7 @@ export default function Dashboard() {
           Your Progress 📊
         </Typography>
 
-        {/* ✅ Logged-in user info */}
+        {/* ✅ User info */}
         {user ? (
           <div style={{ marginBottom: "1rem", textAlign: "center" }}>
             <Typography variant="h6">Welcome, {user.name} 👋</Typography>
@@ -100,8 +106,7 @@ export default function Dashboard() {
           </Typography>
         )}
 
-        {/* Progress Line Chart */}
-        <Line data={data} />
+        <Line data={chartData} />
       </Paper>
     </div>
   );

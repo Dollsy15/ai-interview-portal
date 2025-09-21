@@ -1,56 +1,96 @@
 // src/api.js
 import axios from "axios";
 
-// ✅ Base URL
-// Local development: localhost:5000
-// Deployment time: replace with your hosted backend URL (e.g. "https://my-app.onrender.com/api")
+// ✅ Base URL using environment variable (fallback to localhost)
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
 });
 
-// ✅ Interceptor: automatically token attach karega har protected request me
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    req.headers.Authorization = `Bearer ${token}`;
+// ✅ Request Interceptor: automatically attach token for protected requests
+API.interceptors.request.use(
+  (req) => {
+    const token = localStorage.getItem("token");
+    if (token) req.headers.Authorization = `Bearer ${token}`;
+    return req;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ✅ Response Interceptor: handle 401 globally
+API.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login"; // redirect to login page
+    }
+    return Promise.reject(error);
   }
-  return req;
-});
+);
 
 // ===========================
 // 🔐 AUTH APIs
 // ===========================
 
-// Register new user
 export const registerUser = async (form) => {
-  const res = await API.post("/auth/register", form);
-  return res.data;
+  try {
+    const res = await API.post("/auth/register", form);
+    return res.data;
+  } catch (error) {
+    console.error("Register Error:", error.response?.data || error.message);
+    throw error;
+  }
 };
 
-// Login user
 export const loginUser = async (form) => {
-  const res = await API.post("/auth/login", form);
-  return res.data;
+  try {
+    const res = await API.post("/auth/login", form);
+    return res.data;
+  } catch (error) {
+    console.error("Login Error:", error.response?.data || error.message);
+    throw error;
+  }
 };
 
-// Get current logged-in user (protected)
 export const getUserProfile = async () => {
-  const res = await API.get("/auth/me");
-  return res.data;
+  try {
+    const res = await API.get("/auth/me");
+    return res.data;
+  } catch (error) {
+    console.error(
+      "Get User Profile Error:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
 };
 
 // ===========================
 // 📖 INTERVIEW ROUND APIs (future)
 // ===========================
 
-// Example: fetch MCQ questions (protected)
 export const getMcqQuestions = async () => {
-  const res = await API.get("/mcq");
-  return res.data;
+  try {
+    const res = await API.get("/mcq");
+    return res.data;
+  } catch (error) {
+    console.error(
+      "Get MCQ Questions Error:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
 };
 
-// Example: fetch coding round questions
+// Example for future coding questions
 // export const getCodingQuestions = async () => {
-//   const res = await API.get("/coding");
-//   return res.data;
+//   try {
+//     const res = await API.get("/coding");
+//     return res.data;
+//   } catch (error) {
+//     console.error("Get Coding Questions Error:", error.response?.data || error.message);
+//     throw error;
+//   }
 // };
+
+export default API;
