@@ -6,7 +6,7 @@ const { mongoURI } = require("./config"); // MongoDB connection URI
 
 // Routes
 const authRoutes = require("./routes/auth");
-const mcqRoutes = require("./src/routes/mcq"); // ✅ MCQ route
+const mcqRoutes = require("./routes/mcq"); // ✅ MCQ route
 
 const app = express();
 
@@ -26,10 +26,7 @@ app.use("/api/mcq", mcqRoutes);
 // MongoDB Connection
 // ===========================
 mongoose
-  .connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(mongoURI) // ✅ Removed deprecated options
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
