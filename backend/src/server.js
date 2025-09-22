@@ -1,13 +1,12 @@
-// server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const { mongoURI } = require("./config"); // MongoDB connection URI
+require("dotenv").config(); // ✅ load variables from .env
 
 // Routes
 const authRoutes = require("./routes/auth");
-const mcqRoutes = require("./routes/mcq"); // ✅ MCQ route
-const codingRoutes = require("./routes/coding"); // ✅ Added Coding Round route
+const mcqRoutes = require("./routes/mcq");
+const codingRoutes = require("./routes/coding");
 
 const app = express();
 
@@ -22,13 +21,13 @@ app.use(express.json()); // Parse JSON requests
 // ===========================
 app.use("/api/auth", authRoutes);
 app.use("/api/mcq", mcqRoutes);
-app.use("/api/coding", codingRoutes); // ✅ New Coding Round route
+app.use("/api/coding", codingRoutes); // ✅ Coding Round route
 
 // ===========================
 // MongoDB Connection
 // ===========================
 mongoose
-  .connect(mongoURI) // ✅ Removed deprecated options
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 

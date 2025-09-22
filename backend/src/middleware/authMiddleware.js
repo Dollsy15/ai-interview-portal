@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
 const { jwtSecret } = require("../config");
-const User = require("../models/User"); // 👈 DB se user fetch karne ke liye model import
+const User = require("../models/User"); // DB se user fetch karne ke liye model import
 
+// ✅ Authenticate user middleware
 const authMiddleware = async (req, res, next) => {
   try {
     // Token get from headers
@@ -30,4 +31,13 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = authMiddleware;
+// ✅ Admin-only middleware
+const adminMiddleware = (req, res, next) => {
+  if (req.user && req.user.role === "admin") {
+    next();
+  } else {
+    return res.status(403).json({ msg: "Access denied, admins only" });
+  }
+};
+
+module.exports = { authMiddleware, adminMiddleware };

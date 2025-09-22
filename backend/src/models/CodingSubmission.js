@@ -4,17 +4,30 @@ const CodingSubmissionSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // reference your User model
-      required: true
+      ref: "User", // reference to User model
+      required: true,
     },
+
+    // ✅ candidate's submitted code
     code: {
       type: String,
-      required: true
+      required: true,
+      trim: true,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    }
+
+    // ✅ optionally store programming language (future support)
+    language: {
+      type: String,
+      default: "javascript",
+    },
+
+    // ✅ evaluation score for this submission
+    score: {
+      type: Number,
+      default: null, // null means not yet evaluated
+    },
+
+    // createdAt & updatedAt automatic from timestamps option
   },
   { timestamps: true }
 );
