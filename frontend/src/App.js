@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CodingRound from "./pages/CodingRound";
+import AdminSubmissions from "./pages/AdminSubmissions";
 import McqRound from "./pages/McqRound";
 import BehavioralRound from "./pages/BehavioralRound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -33,6 +34,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/coding" element={<CodingRound />} />
+              <Route path="/admin/submissions" element={<AdminSubmissions />} />
               <Route path="/mcq" element={<McqRound />} />
               <Route path="/behavioral" element={<BehavioralRound />} />
             </Route>

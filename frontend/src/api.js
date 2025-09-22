@@ -30,7 +30,6 @@ API.interceptors.response.use(
 // ===========================
 // 🔐 AUTH APIs
 // ===========================
-
 export const registerUser = async (form) => {
   const res = await API.post("/auth/register", form);
   return res.data;
@@ -49,7 +48,6 @@ export const getUserProfile = async () => {
 // ===========================
 // 📊 SCORES APIs
 // ===========================
-
 export const addUserScore = async (type, value) => {
   // type = "mcq" or "coding"
   const res = await API.post("/auth/score", { type, value });
@@ -57,23 +55,27 @@ export const addUserScore = async (type, value) => {
 };
 
 // ===========================
-// 📖 INTERVIEW APIs (future)
+// 📝 MCQ APIs
 // ===========================
-
 export const getMcqQuestions = async () => {
   const res = await API.get("/mcq");
   return res.data;
 };
 
-// API helper function
+// ===========================
+// 💻 CODING APIs
+// ===========================
+
+// Candidate: submit coding answer
 export const submitCodingAnswer = async (data) => {
-  return axios.post("http://localhost:5000/api/coding/submit", data);
+  const res = await API.post("/coding/submit", data);
+  return res.data;
 };
 
-// Example for future coding questions
-// export const getCodingQuestions = async () => {
-//   const res = await API.get("/coding");
-//   return res.data;
-// };
+// Admin: fetch all coding submissions
+export const getCodingSubmissions = async () => {
+  const res = await API.get("/coding/submissions");
+  return res.data;
+};
 
 export default API;
