@@ -15,12 +15,8 @@ export default function CodingRound() {
 
   const handleSubmit = async () => {
     try {
-      const response = await submitCodingAnswer({
-        code,
-        userId: "123", // later replace with logged-in user
-      });
-
-      setOutput(response.data.message);
+      const res = await submitCodingAnswer({ code, language: "javascript" });
+      setOutput(res.message);
       setSubmitted(true);
     } catch (err) {
       console.error(err);

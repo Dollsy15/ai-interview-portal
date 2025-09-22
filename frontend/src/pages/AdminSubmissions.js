@@ -14,7 +14,11 @@ export default function AdminSubmissions() {
     <div style={{ padding: "2rem" }}>
       <h2>📜 Coding Submissions (Admin)</h2>
 
-      <table border="1" cellPadding="10" style={{ marginTop: "1rem", width: "100%", borderCollapse: "collapse" }}>
+      <table
+        border="1"
+        cellPadding="10"
+        style={{ marginTop: "1rem", width: "100%", borderCollapse: "collapse" }}
+      >
         <thead style={{ background: "#efefef" }}>
           <tr>
             <th>User</th>
@@ -29,7 +33,13 @@ export default function AdminSubmissions() {
               <td>{s.user?.name}</td>
               <td>{s.user?.email}</td>
               <td>
-                <pre style={{ whiteSpace: "pre-wrap", maxWidth: "400px", overflowX: "auto" }}>
+                <pre
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    maxWidth: "400px",
+                    overflowX: "auto",
+                  }}
+                >
                   {s.code}
                 </pre>
               </td>

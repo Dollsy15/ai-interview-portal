@@ -1,11 +1,11 @@
 import axios from "axios";
 
-// ✅ Base URL using environment variable (fallback to localhost)
+// ✅ Axios instance with baseURL & interceptors
 const API = axios.create({
   baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
 });
 
-// ✅ Request Interceptor: auto attach token
+// ✅ Attach token automatically
 API.interceptors.request.use(
   (req) => {
     const token = localStorage.getItem("token");
@@ -15,21 +15,19 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Response Interceptor: auto logout on 401
+// ✅ Logout on invalid token
 API.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-      window.location.href = "/login"; // force re-login
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
 );
 
-// ===========================
 // 🔐 AUTH APIs
-// ===========================
 export const registerUser = async (form) => {
   const res = await API.post("/auth/register", form);
   return res.data;
@@ -45,34 +43,24 @@ export const getUserProfile = async () => {
   return res.data;
 };
 
-// ===========================
-// 📊 SCORES APIs
-// ===========================
+// 📊 SCORES API
 export const addUserScore = async (type, value) => {
-  // type = "mcq" or "coding"
   const res = await API.post("/auth/score", { type, value });
   return res.data;
 };
 
-// ===========================
-// 📝 MCQ APIs
-// ===========================
+// 📝 MCQ
 export const getMcqQuestions = async () => {
   const res = await API.get("/mcq");
   return res.data;
 };
 
-// ===========================
-// 💻 CODING APIs
-// ===========================
-
-// Candidate: submit coding answer
+// 💻 CODING
 export const submitCodingAnswer = async (data) => {
   const res = await API.post("/coding/submit", data);
   return res.data;
 };
 
-// Admin: fetch all coding submissions
 export const getCodingSubmissions = async () => {
   const res = await API.get("/coding/submissions");
   return res.data;
