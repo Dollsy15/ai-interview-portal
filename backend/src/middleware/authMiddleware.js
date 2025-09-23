@@ -1,11 +1,11 @@
 const jwt = require("jsonwebtoken");
 const { jwtSecret } = require("../config");
-const User = require("../models/User"); // DB se user fetch karne ke liye model import
+const User = require("../models/User"); 
 
-// ✅ Authenticate user middleware
+// Authenticate user middleware
 const authMiddleware = async (req, res, next) => {
   try {
-    // Token get from headers
+    // Get token from headers
     const token = req.header("Authorization")?.replace("Bearer ", "");
     if (!token) {
       return res.status(401).json({ msg: "No token, authorization denied" });
@@ -14,16 +14,13 @@ const authMiddleware = async (req, res, next) => {
     // Verify and decode token
     const decoded = jwt.verify(token, jwtSecret);
 
-    // Fetch user from DB and exclude password
+    // Fetch user (excluding password)
     const user = await User.findById(decoded.id).select("-password");
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    // Attach user object to request
-    req.user = user;
-
-    // Continue to next middleware/controller
+    req.user = user; // attach user to request
     next();
   } catch (err) {
     console.error("Auth Middleware Error:", err.message);
@@ -31,13 +28,4 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-// ✅ Admin-only middleware
-const adminMiddleware = (req, res, next) => {
-  if (req.user && req.user.role === "admin") {
-    next();
-  } else {
-    return res.status(403).json({ msg: "Access denied, admins only" });
-  }
-};
-
-module.exports = { authMiddleware, adminMiddleware };
+module.exports = authMiddleware;

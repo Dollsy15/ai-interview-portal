@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const CodingSubmission = require("../models/CodingSubmission");
-const {
-  authMiddleware,
-  adminMiddleware,
-} = require("../middleware/authMiddleware");
 
+// Import middlewares separately
+const authMiddleware = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
+
+// ==================================================
 // ✅ POST: Candidate submits code (must be logged in)
+// ==================================================
 router.post("/submit", authMiddleware, async (req, res) => {
   const { code, language } = req.body;
 
@@ -16,7 +18,7 @@ router.post("/submit", authMiddleware, async (req, res) => {
 
   try {
     const newSubmission = new CodingSubmission({
-      user: req.user._id, // ✅ User attached from authMiddleware
+      user: req.user._id, // ✅ comes from authMiddleware
       code,
       language: language || "javascript",
     });
@@ -33,7 +35,9 @@ router.post("/submit", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ GET: Admin fetches all submissions (must be admin)
+// ==================================================
+// ✅ GET: Admin fetches all submissions (admin only)
+// ==================================================
 router.get(
   "/submissions",
   authMiddleware,
@@ -41,7 +45,7 @@ router.get(
   async (req, res) => {
     try {
       const submissions = await CodingSubmission.find()
-        .populate("user", "name email role") // fetch user details
+        .populate("user", "name email role") // fetch user details (excluding password)
         .sort({ createdAt: -1 });
 
       res.json(submissions);

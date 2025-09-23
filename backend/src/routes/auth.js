@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { jwtSecret } = require("../config");
-const authMiddleware = require("../middleware/authMiddleware");
+const { authMiddleware } = require("../middleware/authMiddleware");
 
 // ============================
 // Register
@@ -63,7 +63,7 @@ router.post("/login", async (req, res) => {
 // ============================
 router.get("/me", authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user._id).select("-password");
     if (!user) return res.status(404).json({ msg: "User not found" });
 
     res.json({ user });
@@ -78,19 +78,13 @@ router.get("/me", authMiddleware, async (req, res) => {
 // ============================
 router.post("/score", authMiddleware, async (req, res) => {
   try {
-    const { type, value } = req.body; // type=“mcq” or “coding”, value=number score
-    const user = await User.findById(req.user.id);
+    const { type, value } = req.body;
+    const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    if (type === "mcq") {
-      user.scores.mcq.push(value);
-    } else if (type === "coding") {
-      user.scores.coding.push(value);
-    } else {
-      return res
-        .status(400)
-        .json({ msg: "Invalid type, must be 'mcq' or 'coding'" });
-    }
+    if (type === "mcq") user.scores.mcq.push(value);
+    else if (type === "coding") user.scores.coding.push(value);
+    else return res.status(400).json({ msg: "Invalid type, must be 'mcq' or 'coding'" });
 
     await user.save();
     res.json({ msg: "Score added ✅", scores: user.scores });
@@ -100,4 +94,7 @@ router.post("/score", authMiddleware, async (req, res) => {
   }
 });
 
+// ============================
+// Export router
+// ============================
 module.exports = router;
