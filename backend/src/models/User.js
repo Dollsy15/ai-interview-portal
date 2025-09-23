@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
     },
 
     password: {
@@ -27,7 +28,7 @@ const userSchema = new mongoose.Schema(
       default: "student",
     },
 
-    // ✅ scores field to track multiple attempts (MCQ & Coding)
+    // ✅ scores to track mcq and coding attempts
     scores: {
       mcq: { type: [Number], default: [] },
       coding: { type: [Number], default: [] },

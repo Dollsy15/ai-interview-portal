@@ -7,6 +7,7 @@ require("dotenv").config(); // ✅ load variables from .env
 const authRoutes = require("./routes/auth");
 const mcqRoutes = require("./routes/mcq");
 const codingRoutes = require("./routes/coding");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 
@@ -21,7 +22,8 @@ app.use(express.json()); // Parse JSON requests
 // ===========================
 app.use("/api/auth", authRoutes);
 app.use("/api/mcq", mcqRoutes);
-app.use("/api/coding", codingRoutes); // ✅ Coding Round route
+app.use("/api/coding", codingRoutes);
+app.use("/api/admin", adminRoutes);
 
 // ===========================
 // MongoDB Connection

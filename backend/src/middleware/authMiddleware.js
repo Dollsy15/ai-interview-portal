@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
-const { jwtSecret } = require("../config");
-const User = require("../models/User"); 
+const { jwtSecret } = require("../routes/config"); // 🔑 make sure this points to jwtSecret
+const User = require("../models/User");
 
-// Authenticate user middleware
+// ✅ Authenticate user middleware
 const authMiddleware = async (req, res, next) => {
   try {
     // Get token from headers
@@ -14,7 +14,7 @@ const authMiddleware = async (req, res, next) => {
     // Verify and decode token
     const decoded = jwt.verify(token, jwtSecret);
 
-    // Fetch user (excluding password)
+    // Fetch user details (excluding password)
     const user = await User.findById(decoded.id).select("-password");
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
