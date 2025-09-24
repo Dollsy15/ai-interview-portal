@@ -1,3 +1,4 @@
+// routes/admin.js
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
@@ -6,13 +7,20 @@ const User = require("../models/User");
 const CodingSubmission = require("../models/CodingSubmission");
 const MCQ = require("../models/MCQ");
 
+/**
+ * ====================
+ *  ADMIN ROUTES
+ * ====================
+ */
+
 // ✅ Get all users
 router.get("/users", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const users = await User.find().select("-password");
-    res.json(users);
+    res.json({ success: true, users });
   } catch (err) {
-    res.status(500).json({ error: "Server Error" });
+    console.error("Get Users Error:", err.message);
+    res.status(500).json({ success: false, msg: "Server Error" });
   }
 });
 
@@ -27,9 +35,10 @@ router.get(
         "user",
         "name email"
       );
-      res.json(submissions);
+      res.json({ success: true, submissions });
     } catch (err) {
-      res.status(500).json({ error: "Server Error" });
+      console.error("Get Coding Submissions Error:", err.message);
+      res.status(500).json({ success: false, msg: "Server Error" });
     }
   }
 );
@@ -38,9 +47,10 @@ router.get(
 router.get("/mcq", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const questions = await MCQ.find();
-    res.json(questions);
+    res.json({ success: true, questions });
   } catch (err) {
-    res.status(500).json({ error: "Server Error" });
+    console.error("Get MCQ Error:", err.message);
+    res.status(500).json({ success: false, msg: "Server Error" });
   }
 });
 

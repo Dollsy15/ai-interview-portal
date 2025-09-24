@@ -1,3 +1,4 @@
+// server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -5,6 +6,7 @@ require("dotenv").config();
 
 // Routes
 const authRoutes = require("./routes/auth");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 
@@ -13,7 +15,8 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes); // Auth routes (login, register, me, etc.)
+app.use("/api/admin", adminRoutes); // Admin panel routes
 
 // MongoDB Connection
 mongoose
