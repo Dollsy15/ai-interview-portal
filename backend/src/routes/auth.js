@@ -4,11 +4,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { jwtSecret } = require("../config");
-const { authMiddleware } = require("../middleware/authMiddleware");
+const authMiddleware = require("../middleware/authMiddleware");
 
-// ============================
 // Register
-// ============================
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -26,9 +24,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ============================
 // Login
-// ============================
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -58,33 +54,23 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ============================
 // Get current user
-// ============================
 router.get("/me", authMiddleware, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select("-password");
-    if (!user) return res.status(404).json({ msg: "User not found" });
-
-    res.json({ user });
-  } catch (err) {
-    console.error("GetMe Error:", err.message);
-    res.status(500).json({ error: "Server Error" });
-  }
+  res.json({ user: req.user });
 });
 
-// ============================
 // Add Score
-// ============================
 router.post("/score", authMiddleware, async (req, res) => {
   try {
     const { type, value } = req.body;
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ msg: "User not found" });
+    const user = req.user;
 
     if (type === "mcq") user.scores.mcq.push(value);
     else if (type === "coding") user.scores.coding.push(value);
-    else return res.status(400).json({ msg: "Invalid type, must be 'mcq' or 'coding'" });
+    else
+      return res
+        .status(400)
+        .json({ msg: "Invalid type, must be 'mcq' or 'coding'" });
 
     await user.save();
     res.json({ msg: "Score added ✅", scores: user.scores });
@@ -94,7 +80,4 @@ router.post("/score", authMiddleware, async (req, res) => {
   }
 });
 
-// ============================
-// Export router
-// ============================
 module.exports = router;

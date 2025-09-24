@@ -2,12 +2,7 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
+    name: { type: String, required: true, trim: true },
     email: {
       type: String,
       required: true,
@@ -15,28 +10,18 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-
-    password: {
-      type: String,
-      required: true,
-    },
-
-    // ✅ role: default "student", can be "student", "candidate", or "admin"
+    password: { type: String, required: true },
     role: {
       type: String,
       enum: ["student", "candidate", "admin"],
       default: "student",
     },
-
-    // ✅ scores to track mcq and coding attempts
     scores: {
       mcq: { type: [Number], default: [] },
       coding: { type: [Number], default: [] },
     },
   },
-  {
-    timestamps: true, // adds createdAt & updatedAt
-  }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("User", userSchema);
