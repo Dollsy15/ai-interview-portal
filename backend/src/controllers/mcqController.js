@@ -1,30 +1,36 @@
 const MCQ = require("../models/MCQ");
 
-// ✅ Get all questions
+// ✅ GET all MCQs
 exports.getQuestions = async (req, res) => {
   try {
     const questions = await MCQ.find();
-    res.json(questions);
+    res.json({ success: true, questions });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch questions" });
+    console.error("Get MCQ Error:", err.message);
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to fetch questions" });
   }
 };
 
-// ✅ Submit answers & calculate score
+// ✅ POST submit answers
 exports.submitAnswers = async (req, res) => {
   try {
-    const { answers } = req.body; // {questionId: selectedOption}
+    const { answers } = req.body; // format: { "questionId": "selectedOption" }
     const questions = await MCQ.find();
 
     let score = 0;
     questions.forEach((q) => {
-      if (answers[q._id] === q.answer) {
+      if (answers[q._id] && answers[q._id] === q.correctAnswer) {
         score++;
       }
     });
 
-    res.json({ total: questions.length, score });
+    res.json({ success: true, total: questions.length, score });
   } catch (err) {
-    res.status(500).json({ error: "Error while evaluating answers" });
+    console.error("Submit MCQ Error:", err.message);
+    res
+      .status(500)
+      .json({ success: false, error: "Error while evaluating answers" });
   }
 };
