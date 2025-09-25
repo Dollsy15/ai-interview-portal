@@ -14,13 +14,13 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await loginUser(form);
+      const data = await loginUser(form); // already returns res.data
 
-      // Handle both cases: whether loginUser returns axios response (with .data)
-      // OR directly Json data
-      const data = res.data ? res.data : res;
+      if (!data.success) {
+        alert(data.msg || "❌ Login failed");
+        return;
+      }
 
-      // save token & user in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
