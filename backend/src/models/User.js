@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["student", "candidate", "admin"],
+      enum: ["student", "candidate", "admin", "user"],
       default: "student",
     },
     scores: {
