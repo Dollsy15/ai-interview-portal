@@ -1,9 +1,10 @@
 const MCQ = require("../models/MCQ");
 
-// ✅ GET all MCQs
+// GET all MCQs
 exports.getQuestions = async (req, res) => {
   try {
     const questions = await MCQ.find();
+    // ✅ Send as { success: true, questions: [...] } exactly
     res.json({ success: true, questions });
   } catch (err) {
     console.error("Get MCQ Error:", err.message);
@@ -13,10 +14,10 @@ exports.getQuestions = async (req, res) => {
   }
 };
 
-// ✅ POST submit answers
+// POST submit answers
 exports.submitAnswers = async (req, res) => {
   try {
-    const { answers } = req.body; // format: { "questionId": "selectedOption" }
+    const { answers } = req.body; // { questionId: selectedOption }
     const questions = await MCQ.find();
 
     let score = 0;

@@ -12,6 +12,16 @@ const codingQuestionSchema = new mongoose.Schema(
     category: { type: String },
     sampleInput: { type: String },
     sampleOutput: { type: String },
+    starterCode: {
+      type: String,
+      default: "// Your code here", // ✅ Starter function for every question
+    },
+    testCases: [
+      {
+        input: { type: mongoose.Schema.Types.Mixed, required: true },
+        expected: { type: mongoose.Schema.Types.Mixed, required: true },
+      },
+    ],
   },
   { timestamps: true }
 );
