@@ -1,32 +1,91 @@
-import React, { useState } from "react";
+// CodingRound.js
+import React, { useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Paper, Button, Typography } from "@mui/material";
 import Timer from "../components/Timer";
-import { submitCodingAnswer } from "../api";
+import { submitCodingAnswer, getCodingQuestions } from "../api";
 
 export default function CodingRound() {
-  const question = "Write a function to reverse a string in JavaScript.";
-
-  const [code, setCode] = useState(`function reverseString(str) {
-  // Your code here
-}`);
+  const [questions, setQuestions] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = async () => {
+  // Load questions on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getCodingQuestions();
+        const qs = data.questions || [];
+        setQuestions(qs);
+        if (qs.length > 0) {
+          setCurrentIndex(0);
+          setCode(qs[0].starterCode || "// Your code here");
+        }
+      } catch (err) {
+        console.error("❌ Error fetching coding questions:", err);
+      }
+    })();
+  }, []);
+
+  if (questions.length === 0) return <p>Loading questions...</p>;
+
+  const currentQuestion = questions[currentIndex];
+
+  // Run test cases (basic evaluation)
+  const runTestCases = (func, testCases) => {
     try {
-      const res = await submitCodingAnswer({ code, language: "javascript" });
-      setOutput(res.message);
-      setSubmitted(true);
+      for (let tc of testCases) {
+        const input = Array.isArray(tc.input) ? tc.input : [tc.input];
+        const result = func(...input);
+        if (result !== tc.expected) return false;
+      }
+      return true;
     } catch (err) {
       console.error(err);
-      setOutput("❌ Failed to submit code");
+      return false;
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // Create function from user code
+      // eslint-disable-next-line no-new-func
+      const func = new Function("return " + code)();
+
+      const passed = runTestCases(func, currentQuestion.testCases || []);
+
+      if (passed) {
+        setOutput("✅ All testcases passed!");
+        await submitCodingAnswer({ code, language: "javascript" });
+        setSubmitted(true);
+
+        // Move to next question after 1.5s
+        if (currentIndex + 1 < questions.length) {
+          setTimeout(() => {
+            setCurrentIndex(currentIndex + 1);
+            setCode(
+              questions[currentIndex + 1].starterCode || "// Your code here"
+            );
+            setOutput("");
+            setSubmitted(false);
+          }, 1500);
+        } else {
+          setOutput("🎉 You completed all coding questions!");
+        }
+      } else {
+        setOutput("❌ Some testcases failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      setOutput("❌ Error in your code");
     }
   };
 
   const handleAutoSubmit = () => {
     if (!submitted) {
-      setOutput("⏰ Time is up! Auto-submitting your code...");
+      setOutput("⏰ Time is up! Auto-submitting...");
       handleSubmit();
     }
   };
@@ -55,15 +114,18 @@ export default function CodingRound() {
           borderRadius: "12px",
         }}
       >
-        {/* Timer */}
+        <Typography variant="h5" gutterBottom fontWeight="bold">
+          Coding Question {currentIndex + 1} / {questions.length}
+        </Typography>
+        <Typography sx={{ mb: 3, color: "#444" }}>
+          {currentQuestion.title}
+        </Typography>
+        <Typography sx={{ mb: 3, color: "#666" }}>
+          {currentQuestion.description}
+        </Typography>
+
         <Timer duration={10 * 60} onTimeUp={handleAutoSubmit} />
 
-        <Typography variant="h5" gutterBottom fontWeight="bold">
-          Coding Question 💻
-        </Typography>
-        <Typography sx={{ mb: 3, color: "#444" }}>{question}</Typography>
-
-        {/* Monaco Editor */}
         <Editor
           height="300px"
           defaultLanguage="javascript"

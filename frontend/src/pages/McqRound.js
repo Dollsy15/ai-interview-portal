@@ -22,18 +22,19 @@ export default function McqRound() {
       try {
         const data = await getMcqQuestions();
         console.log("Fetched MCQs:", data);
-        setQuestions(data);
+
+        setQuestions(data.questions || []);
       } catch (err) {
         console.error("❌ Error fetching MCQs:", err);
       }
     })();
   }, []);
 
-  // ✅ Store selected option TEXT
+  // ✅ Store selected option
   const handleChange = (qId, value) => {
     setAnswers({
       ...answers,
-      [qId]: value, // store actual text (e.g. "Python")
+      [qId]: value,
     });
   };
 
@@ -43,8 +44,7 @@ export default function McqRound() {
 
     questions.forEach((q) => {
       const userAns = answers[q._id] ?? "";
-      const correctAns = q.answer;
-      console.log(`Q: ${q.question} | user=${userAns} | correct=${correctAns}`);
+      const correctAns = q.correctAnswer; // backend field
       if (userAns === correctAns) {
         calcScore++;
       }
@@ -67,39 +67,55 @@ export default function McqRound() {
         minHeight: "100vh",
         backgroundImage:
           "url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1650&q=80')",
-        background: "#f9f9f9",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
         padding: "2rem",
         display: "flex",
         justifyContent: "center",
+        alignItems: "flex-start",
       }}
     >
-      <Paper sx={{ p: 4, width: "100%", maxWidth: 700 }}>
+      <Paper
+        sx={{
+          p: 4,
+          width: "100%",
+          maxWidth: 700,
+          minHeight: "400px",
+          background: "rgba(255,255,255,0.9)",
+          borderRadius: "12px",
+        }}
+      >
         <Typography variant="h4" gutterBottom>
           MCQ Round
         </Typography>
 
-        {score === null ? (
+        {questions.length === 0 ? (
+          <Typography variant="h6">
+            No questions available. Please check the database.
+          </Typography>
+        ) : score === null ? (
           <>
-            {questions.map((q, index) => (
-              <div key={q._id} style={{ marginBottom: "1.5rem" }}>
-                <Typography variant="h6">
-                  {index + 1}. {q.question}
-                </Typography>
-                <RadioGroup
-                  value={answers[q._id] ?? ""}
-                  onChange={(e) => handleChange(q._id, e.target.value)}
-                >
-                  {q.options.map((opt, i) => (
-                    <FormControlLabel
-                      key={i}
-                      value={opt} // ✅ FIXED: option text stored
-                      control={<Radio />}
-                      label={opt}
-                    />
-                  ))}
-                </RadioGroup>
-              </div>
-            ))}
+            {Array.isArray(questions) &&
+              questions.map((q, index) => (
+                <div key={q._id} style={{ marginBottom: "1.5rem" }}>
+                  <Typography variant="h6">
+                    {index + 1}. {q.question}
+                  </Typography>
+                  <RadioGroup
+                    value={answers[q._id] ?? ""}
+                    onChange={(e) => handleChange(q._id, e.target.value)}
+                  >
+                    {q.options.map((opt, i) => (
+                      <FormControlLabel
+                        key={i}
+                        value={opt}
+                        control={<Radio />}
+                        label={opt}
+                      />
+                    ))}
+                  </RadioGroup>
+                </div>
+              ))}
 
             <Button
               variant="contained"

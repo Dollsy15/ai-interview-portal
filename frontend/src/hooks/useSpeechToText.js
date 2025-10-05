@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback } from "react";
-import useSpeechToText from "../../hooks/useSpeechToText";
 
 const useSpeechToText = () => {
   const [isListening, setIsListening] = useState(false);
@@ -15,7 +14,7 @@ const useSpeechToText = () => {
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      setError("Speech recognition not supported. Please use Chrome or Edge.");
+      setError("Speech recognition not supported. Use Chrome or Edge.");
       return;
     }
 

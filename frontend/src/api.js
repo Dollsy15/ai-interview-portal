@@ -1,11 +1,11 @@
 import axios from "axios";
 
-// ✅ Axios instance with baseURL & interceptors
+// Axios instance
 const API = axios.create({
   baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
 });
 
-// ✅ Attach token automatically
+// Attach token
 API.interceptors.request.use(
   (req) => {
     const token = localStorage.getItem("token");
@@ -15,7 +15,7 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Logout on invalid token
+// Logout on 401
 API.interceptors.response.use(
   (res) => res,
   (error) => {
@@ -27,43 +27,26 @@ API.interceptors.response.use(
   }
 );
 
-// 🔐 AUTH APIs
-export const registerUser = async (form) => {
-  const res = await API.post("/auth/register", form);
-  return res.data;
-};
+// AUTH
+export const registerUser = (form) =>
+  API.post("/auth/register", form).then((res) => res.data);
+export const loginUser = (form) =>
+  API.post("/auth/login", form).then((res) => res.data);
+export const getUserProfile = () => API.get("/auth/me").then((res) => res.data);
 
-export const loginUser = async (form) => {
-  const res = await API.post("/auth/login", form);
-  return res.data;
-};
+// SCORES
+export const addUserScore = (type, value) =>
+  API.post("/auth/score", { type, value }).then((res) => res.data);
 
-export const getUserProfile = async () => {
-  const res = await API.get("/auth/me");
-  return res.data;
-};
+// MCQ
+export const getMcqQuestions = () => API.get("/mcq").then((res) => res.data);
 
-// 📊 SCORES API
-export const addUserScore = async (type, value) => {
-  const res = await API.post("/auth/score", { type, value });
-  return res.data;
-};
-
-// 📝 MCQ
-export const getMcqQuestions = async () => {
-  const res = await API.get("/mcq");
-  return res.data;
-};
-
-// 💻 CODING
-export const submitCodingAnswer = async (data) => {
-  const res = await API.post("/coding/submit", data);
-  return res.data;
-};
-
-export const getCodingSubmissions = async () => {
-  const res = await API.get("/coding/submissions");
-  return res.data;
-};
+// CODING
+export const getCodingQuestions = () =>
+  API.get("/coding/questions").then((res) => res.data);
+export const submitCodingAnswer = (data) =>
+  API.post("/coding/submit", data).then((res) => res.data);
+export const getCodingSubmissions = () =>
+  API.get("/coding/submissions").then((res) => res.data);
 
 export default API;
