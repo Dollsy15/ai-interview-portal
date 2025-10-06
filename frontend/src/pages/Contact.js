@@ -22,7 +22,7 @@ export default function Contact() {
         backgroundSize: "cover",
         backgroundPosition: "center",
         minHeight: "100vh",
-        paddingTop: "3rem",
+        paddingTop: "5rem",
         paddingBottom: "3rem",
       }}
     >
@@ -30,14 +30,22 @@ export default function Contact() {
         <Paper
           elevation={6}
           sx={{
-            p: 4,
-            background: "rgba(255, 255, 255, 0.9)",
+            p: 5,
+            background: "rgba(255, 255, 255, 0.95)",
             borderRadius: "12px",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
           }}
         >
-          <Typography variant="h4" textAlign="center" fontWeight="bold" gutterBottom>
+          <Typography
+            variant="h4"
+            textAlign="center"
+            fontWeight="bold"
+            gutterBottom
+            sx={{ textShadow: "1px 1px 3px rgba(0,0,0,0.2)" }}
+          >
             Contact Us 📩
           </Typography>
+
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
@@ -47,6 +55,7 @@ export default function Contact() {
               onChange={handleChange}
               margin="normal"
               required
+              sx={{ mb: 2 }}
             />
             <TextField
               fullWidth
@@ -57,24 +66,30 @@ export default function Contact() {
               onChange={handleChange}
               margin="normal"
               required
+              sx={{ mb: 2 }}
             />
             <TextField
               fullWidth
               label="Message"
               name="message"
               multiline
-              rows={4}
+              rows={5}
               value={form.message}
               onChange={handleChange}
               margin="normal"
               required
+              sx={{ mb: 2 }}
             />
             <Button
               type="submit"
               variant="contained"
-              color="primary"
               fullWidth
-              sx={{ mt: 2 }}
+              sx={{
+                mt: 2,
+                background: "#1976d2",
+                fontWeight: "bold",
+                "&:hover": { background: "#115293" },
+              }}
             >
               Send Message
             </Button>

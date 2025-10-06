@@ -6,6 +6,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  CircularProgress,
 } from "@mui/material";
 import { getMcqQuestions, addUserScore } from "../api";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +15,8 @@ export default function McqRound() {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   // ✅ Fetch MCQ questions
@@ -21,11 +24,12 @@ export default function McqRound() {
     (async () => {
       try {
         const data = await getMcqQuestions();
-        console.log("Fetched MCQs:", data);
-
         setQuestions(data.questions || []);
       } catch (err) {
         console.error("❌ Error fetching MCQs:", err);
+        alert("Failed to fetch questions. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
@@ -40,11 +44,17 @@ export default function McqRound() {
 
   // ✅ Submit quiz
   const handleSubmit = async () => {
+    if (Object.keys(answers).length < questions.length) {
+      alert("Please answer all questions before submitting!");
+      return;
+    }
+
+    setSubmitting(true);
     let calcScore = 0;
 
     questions.forEach((q) => {
       const userAns = answers[q._id] ?? "";
-      const correctAns = q.correctAnswer; // backend field
+      const correctAns = q.correctAnswer;
       if (userAns === correctAns) {
         calcScore++;
       }
@@ -58,8 +68,26 @@ export default function McqRound() {
       navigate("/dashboard");
     } catch (err) {
       console.error("❌ Failed to save score:", err);
+      alert("Failed to save your score. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -95,35 +123,35 @@ export default function McqRound() {
           </Typography>
         ) : score === null ? (
           <>
-            {Array.isArray(questions) &&
-              questions.map((q, index) => (
-                <div key={q._id} style={{ marginBottom: "1.5rem" }}>
-                  <Typography variant="h6">
-                    {index + 1}. {q.question}
-                  </Typography>
-                  <RadioGroup
-                    value={answers[q._id] ?? ""}
-                    onChange={(e) => handleChange(q._id, e.target.value)}
-                  >
-                    {q.options.map((opt, i) => (
-                      <FormControlLabel
-                        key={i}
-                        value={opt}
-                        control={<Radio />}
-                        label={opt}
-                      />
-                    ))}
-                  </RadioGroup>
-                </div>
-              ))}
+            {questions.map((q, index) => (
+              <div key={q._id} style={{ marginBottom: "1.5rem" }}>
+                <Typography variant="h6">
+                  {index + 1}. {q.question}
+                </Typography>
+                <RadioGroup
+                  value={answers[q._id] ?? ""}
+                  onChange={(e) => handleChange(q._id, e.target.value)}
+                >
+                  {q.options.map((opt, i) => (
+                    <FormControlLabel
+                      key={i}
+                      value={opt}
+                      control={<Radio />}
+                      label={opt}
+                    />
+                  ))}
+                </RadioGroup>
+              </div>
+            ))}
 
             <Button
               variant="contained"
               color="primary"
               onClick={handleSubmit}
               sx={{ mt: 2 }}
+              disabled={submitting}
             >
-              Submit
+              {submitting ? "Submitting..." : "Submit"}
             </Button>
           </>
         ) : (

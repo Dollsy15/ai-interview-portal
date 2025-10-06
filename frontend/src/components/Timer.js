@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 
-function Timer({ duration, onTimeUp }) {
+function Timer({ duration, onTimeUp, questionIndex }) {
   const [timeLeft, setTimeLeft] = useState(duration);
+
+  useEffect(() => {
+    // ✅ Reset timer only when a new question is loaded
+    setTimeLeft(duration);
+  }, [duration, questionIndex]);
 
   useEffect(() => {
     if (timeLeft <= 0) {

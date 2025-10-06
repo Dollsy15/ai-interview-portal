@@ -1,4 +1,3 @@
-// src/pages/Login.js
 import React, { useState } from "react";
 import { TextField, Button, Paper, Typography } from "@mui/material";
 import { loginUser } from "../api";
@@ -14,7 +13,8 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const data = await loginUser(form); // already returns res.data
+      const data = await loginUser(form);
+      console.log("Login response:", data);
 
       if (!data.success) {
         alert(data.msg || "❌ Login failed");
@@ -25,7 +25,7 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       alert("✅ Login successful!");
-      navigate("/dashboard");
+      navigate("/");
     } catch (err) {
       alert(err.response?.data?.msg || "❌ Login failed");
       console.error("Login error:", err);

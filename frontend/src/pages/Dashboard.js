@@ -43,7 +43,6 @@ export default function Dashboard() {
     })();
   }, []);
 
-  // ✅ SAFE: optional chaining + defaults [] prevent crash
   const chartData = user
     ? {
         labels: Array.from(
@@ -82,29 +81,34 @@ export default function Dashboard() {
         backgroundSize: "cover",
         backgroundPosition: "center",
         minHeight: "100vh",
-        padding: "3rem 0",
+        padding: "5rem 0",
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
+        alignItems: "flex-start",
       }}
     >
       <Paper
-        elevation={6}
+        elevation={8}
         sx={{
-          p: 4,
+          p: 5,
           width: "80%",
           maxWidth: 800,
-          background: "rgba(255,255,255,0.9)",
-          borderRadius: "12px",
+          background: "rgba(255,255,255,0.95)",
+          borderRadius: "16px",
+          boxShadow: "0 10px 25px rgba(0,0,0,0.25)",
         }}
       >
-        <Typography variant="h5" textAlign="center" gutterBottom>
+        <Typography
+          variant="h5"
+          textAlign="center"
+          gutterBottom
+          sx={{ textShadow: "1px 1px 2px rgba(0,0,0,0.2)" }}
+        >
           Your Progress 📊
         </Typography>
 
-        {/* ✅ User info */}
         {user ? (
-          <div style={{ marginBottom: "1rem", textAlign: "center" }}>
+          <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
             <Typography variant="h6">Welcome, {user.name} 👋</Typography>
             <Typography variant="body2">Email: {user.email}</Typography>
             <Typography variant="body2">Role: {user.role}</Typography>
