@@ -6,7 +6,7 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 
 const User = require("../models/User");
 const MCQ = require("../models/MCQ");
-const codingQuestions = require("../models/codingQuestions");
+const codingQuestions = require("../models/codingQuestion");
 
 /**
  * ====================

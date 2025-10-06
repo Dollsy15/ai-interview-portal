@@ -16,8 +16,8 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -41,7 +41,15 @@ mongoose
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
-// Error handling middleware
+// 404 handler (any route not matched)
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    error: "Route not found",
+  });
+});
+
+// Global error handler
 app.use((err, req, res, next) => {
   console.error("Error:", err.stack);
   res.status(500).json({
@@ -51,14 +59,6 @@ app.use((err, req, res, next) => {
       process.env.NODE_ENV === "development"
         ? err.message
         : "Internal server error",
-  });
-});
-
-// 404 handler
-app.use("*", (req, res) => {
-  res.status(404).json({
-    success: false,
-    error: "Route not found",
   });
 });
 

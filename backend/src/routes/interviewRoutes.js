@@ -36,7 +36,6 @@ router.post("/generate-questions", authMiddleware, async (req, res) => {
     const { type = "behavioral", count = 5, difficulty = "medium" } = req.body;
 
     let questionPool = [];
-
     switch (type) {
       case "behavioral":
         questionPool = behavioralQuestions;
@@ -60,7 +59,7 @@ router.post("/generate-questions", authMiddleware, async (req, res) => {
         text,
         type,
         difficulty,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
       }));
 
     // Create new interview session
@@ -100,8 +99,26 @@ router.post("/generate-questions", authMiddleware, async (req, res) => {
 // Save interview response
 router.post("/save-response", authMiddleware, async (req, res) => {
   try {
-    const { sessionId, questionId, question, answer } = req.body;
+    // Ensure body exists
+    if (!req.body) {
+      return res.status(400).json({
+        success: false,
+        error: "Request body is missing",
+      });
+    }
 
+    // Use destructuring safely
+    const { sessionId, questionId, question, answer } = req.body || {};
+
+    // Validate input
+    if (!sessionId || !questionId || !question || !answer) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields",
+      });
+    }
+
+    // Find interview session
     const interview = await Interview.findOne({
       sessionId,
       userId: req.user._id,
@@ -115,22 +132,18 @@ router.post("/save-response", authMiddleware, async (req, res) => {
     }
 
     // Calculate word count
-    const wordCount = answer
-      .split(/\s+/)
-      .filter((word) => word.length > 0).length;
+    const wordCount = answer.split(/\s+/).filter((w) => w.length > 0).length;
 
     // Add or update response
-    const responseIndex = interview.responses.findIndex(
+    const existingResponse = interview.responses.find(
       (r) => r.questionId === questionId
     );
 
-    if (responseIndex > -1) {
-      // Update existing response
-      interview.responses[responseIndex].answer = answer;
-      interview.responses[responseIndex].wordCount = wordCount;
-      interview.responses[responseIndex].timestamp = new Date();
+    if (existingResponse) {
+      existingResponse.answer = answer;
+      existingResponse.wordCount = wordCount;
+      existingResponse.timestamp = new Date();
     } else {
-      // Add new response
       interview.responses.push({
         questionId,
         question,
@@ -140,18 +153,22 @@ router.post("/save-response", authMiddleware, async (req, res) => {
       });
     }
 
+    // Save session
     await interview.save();
 
     res.json({
       success: true,
       message: "Response saved successfully",
+      sessionId,
+      questionId,
       wordCount,
     });
-  } catch (error) {
-    console.error("Error saving response:", error);
+  } catch (err) {
+    console.error("Error saving response:", err);
     res.status(500).json({
       success: false,
       error: "Failed to save response",
+      message: err.message,
     });
   }
 });
@@ -205,34 +222,47 @@ router.post("/evaluate", authMiddleware, async (req, res) => {
 // Get interview history
 router.get("/history", authMiddleware, async (req, res) => {
   try {
+    // Ensure user exists
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized",
+      });
+    }
+
+    // Fetch last 10 evaluated interviews with questions included
     const interviews = await Interview.find({
       userId: req.user._id,
       status: "evaluated",
     })
       .sort({ createdAt: -1 })
-      .select("sessionId interviewType evaluation duration createdAt status")
+      .select(
+        "sessionId interviewType evaluation duration createdAt status questions"
+      )
       .limit(10);
 
+    // Map to history format safely
     const history = interviews.map((interview) => ({
-      sessionId: interview.sessionId,
-      type: interview.interviewType,
+      sessionId: interview.sessionId || "",
+      type: interview.interviewType || "",
       score: interview.evaluation?.overallScore || 0,
-      date: interview.createdAt,
+      date: interview.createdAt || new Date(),
       duration: formatDuration(interview.duration),
-      totalQuestions: interview.questions.length,
-      status: interview.status,
+      totalQuestions: interview.questions?.length || 0,
+      status: interview.status || "unknown",
     }));
 
-    res.json({
+    res.status(200).json({
       success: true,
       history,
       totalSessions: history.length,
     });
   } catch (error) {
-    console.error("Error fetching interview history:", error);
+    console.error("❌ Error fetching interview history:", error);
     res.status(500).json({
       success: false,
       error: "Failed to fetch interview history",
+      message: error.message, // optional, useful for debugging
     });
   }
 });

@@ -26,4 +26,6 @@ const codingQuestionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("CodingQuestion", codingQuestionSchema);
+module.exports =
+  mongoose.models.CodingQuestion ||
+  mongoose.model("CodingQuestion", codingQuestionSchema);

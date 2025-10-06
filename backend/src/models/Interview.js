@@ -67,12 +67,23 @@ const InterviewSessionSchema = new mongoose.Schema(
       enum: ["behavioral", "technical", "mixed"],
       default: "behavioral",
     },
+    
+    // Updated questions schema
     questions: [
       {
-        id: String,
-        text: String,
-        type: String,
-        difficulty: String,
+        id: { type: String, required: true },
+        text: { type: String, required: true },
+        type: {
+          type: String,
+          enum: ["behavioral", "technical"],
+          required: true,
+        },
+        difficulty: {
+          type: String,
+          enum: ["easy", "medium", "hard"],
+          default: "medium",
+        },
+        timestamp: { type: Date, default: Date.now },
       },
     ],
     responses: [ResponseSchema],
@@ -99,6 +110,5 @@ const InterviewSessionSchema = new mongoose.Schema(
 
 // Add index for better query performance
 InterviewSessionSchema.index({ userId: 1, createdAt: -1 });
-InterviewSessionSchema.index({ sessionId: 1 });
 
 module.exports = mongoose.model("Interview", InterviewSessionSchema);
