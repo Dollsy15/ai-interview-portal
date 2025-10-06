@@ -1,10 +1,20 @@
 import React, { useState } from "react";
-import { TextField, Button, Paper, Typography } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Paper,
+  Typography,
+  IconButton,
+  InputAdornment,
+  Link as MuiLink,
+} from "@mui/material";
 import { loginUser } from "../api";
 import { useNavigate } from "react-router-dom";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -12,23 +22,23 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.email || !form.password) {
+      alert("Please fill all fields");
+      return;
+    }
     try {
       const data = await loginUser(form);
-      console.log("Login response:", data);
-
       if (!data.success) {
         alert(data.msg || "❌ Login failed");
         return;
       }
-
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-
       alert("✅ Login successful!");
       navigate("/");
     } catch (err) {
       alert(err.response?.data?.msg || "❌ Login failed");
-      console.error("Login error:", err);
+      console.error(err);
     }
   };
 
@@ -58,6 +68,7 @@ export default function Login() {
         <Typography variant="h5" textAlign="center" gutterBottom>
           Login
         </Typography>
+
         <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
@@ -67,18 +78,54 @@ export default function Login() {
             onChange={handleChange}
             margin="normal"
             required
+            autoComplete="off"
+            sx={{
+              "& input:-webkit-autofill": {
+                WebkitBoxShadow: "0 0 0 1000px white inset",
+                WebkitTextFillColor: "#000",
+              },
+            }}
           />
+
           <TextField
             fullWidth
-            type="password"
             name="password"
+            type={showPassword ? "text" : "password"}
             label="Password"
             value={form.password}
             onChange={handleChange}
             margin="normal"
             required
+            autoComplete="off"
+            sx={{
+              "& input:-webkit-autofill": {
+                WebkitBoxShadow: "0 0 0 1000px white inset",
+                WebkitTextFillColor: "#000",
+              },
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
-          <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
+
+          <MuiLink
+            href="#"
+            underline="hover"
+            sx={{ display: "block", textAlign: "right", mb: 2 }}
+          >
+            Forgot Password?
+          </MuiLink>
+
+          <Button type="submit" variant="contained" fullWidth sx={{ mt: 1 }}>
             Login
           </Button>
         </form>

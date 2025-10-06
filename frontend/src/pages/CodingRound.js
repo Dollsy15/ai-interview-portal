@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Paper, Button, Typography, Stack } from "@mui/material";
-import Timer from "../components/Timer";
 
 export default function CodingRound() {
   const sampleQuestions = [
@@ -73,26 +72,16 @@ export default function CodingRound() {
     },
   ];
 
-  const [questions, setQuestions] = useState([]);
+  // Initialize questions directly
+  const [questions] = useState(sampleQuestions);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(sampleQuestions[0].starterCode);
   const [output, setOutput] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [submissions, setSubmissions] = useState({}); // store previous submissions
-  const [timerKey, setTimerKey] = useState(0); // force timer reset only for new question
-
-  // Load hardcoded questions
-  useEffect(() => {
-    setQuestions(sampleQuestions);
-    setCurrentIndex(0);
-    setCode(sampleQuestions[0].starterCode);
-  }, []);
-
-  if (questions.length === 0) return <p>Loading questions...</p>;
+  const [submissions, setSubmissions] = useState({});
 
   const currentQuestion = questions[currentIndex];
 
-  // Run test cases locally
   const runTestCases = (func, testCases) => {
     if (!testCases || testCases.length === 0) return false;
     try {
@@ -119,23 +108,20 @@ export default function CodingRound() {
       const func = new Function("return " + code)();
       const passed = runTestCases(func, currentQuestion.testCases || []);
 
-      // Save submission
       setSubmissions((prev) => ({
         ...prev,
         [currentIndex]: code,
       }));
 
-      if (passed) {
-        setOutput("✅ All testcases passed!");
-        setSubmitted(true);
+      setOutput(
+        passed ? "✅ All testcases passed!" : "❌ Some testcases failed."
+      );
+      setSubmitted(true);
 
-        if (currentIndex + 1 < questions.length) {
-          setTimeout(() => handleNext(), 1500);
-        } else {
-          setOutput("🎉 You completed all coding questions!");
-        }
-      } else {
-        setOutput("❌ Some testcases failed.");
+      if (passed && currentIndex + 1 < questions.length) {
+        setTimeout(() => handleNext(), 1500);
+      } else if (passed) {
+        setOutput("🎉 You completed all coding questions!");
       }
     } catch (err) {
       console.error(err);
@@ -143,32 +129,25 @@ export default function CodingRound() {
     }
   };
 
-  const handleAutoSubmit = () => {
-    if (!submitted) {
-      setOutput("⏰ Time is up! Auto-submitting...");
-      handleSubmit();
-    }
-  };
-
   const handleNext = () => {
     if (currentIndex + 1 < questions.length) {
-      const nextIndex = currentIndex + 1;
-      setCurrentIndex(nextIndex);
-      setCode(submissions[nextIndex] || questions[nextIndex].starterCode);
+      setCurrentIndex((prev) => prev + 1);
+      setSubmitted(false);
       setOutput("");
-      setSubmitted(!!submissions[nextIndex]);
-      setTimerKey(timerKey + 1); // ✅ reset timer only for new question
+      setCode(
+        submissions[currentIndex + 1] || questions[currentIndex + 1].starterCode
+      );
     }
   };
 
   const handlePrev = () => {
     if (currentIndex > 0) {
-      const prevIndex = currentIndex - 1;
-      setCurrentIndex(prevIndex);
-      setCode(submissions[prevIndex] || questions[prevIndex].starterCode);
+      setCurrentIndex((prev) => prev - 1);
+      setSubmitted(false);
       setOutput("");
-      setSubmitted(!!submissions[prevIndex]);
-      // Timer continues, do not reset
+      setCode(
+        submissions[currentIndex - 1] || questions[currentIndex - 1].starterCode
+      );
     }
   };
 
@@ -207,15 +186,8 @@ export default function CodingRound() {
           {currentQuestion.description}
         </Typography>
 
-        {/* Timer resets only for new question */}
-        <Timer
-          key={timerKey} // just use currentIndex, no old submissions affect it
-          duration={10 * 60}
-          onTimeUp={handleAutoSubmit}
-        />
-
         <Editor
-          key={currentIndex} // reload editor on question change
+          key={currentIndex}
           height="300px"
           defaultLanguage="javascript"
           theme="vs-dark"

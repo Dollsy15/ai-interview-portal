@@ -1,29 +1,51 @@
-// src/pages/Register.js
 import React, { useState } from "react";
-import { Paper, Typography, TextField, Button } from "@mui/material";
+import {
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
 import { registerUser } from "../api";
 import { useNavigate } from "react-router-dom";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  const validatePassword = (password) => {
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{6,}$/;
+    return regex.test(password);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.name || !form.email || !form.password) {
+      alert("Please fill all fields");
+      return;
+    }
+    if (!validatePassword(form.password)) {
+      alert(
+        "Password must contain uppercase, lowercase, number, special character and at least 6 characters"
+      );
+      return;
+    }
+
     try {
       const res = await registerUser(form);
-
-      // smart handling: agar res.data hai to use lo, warna res lo
       const data = res.data ? res.data : res;
-
       alert(data.msg || "✅ Registered successfully!");
       navigate("/login");
     } catch (err) {
       alert(err.response?.data?.msg || "❌ Registration failed");
-      console.error("Register error:", err);
+      console.error(err);
     }
   };
 
@@ -53,6 +75,7 @@ export default function Register() {
         <Typography variant="h5" textAlign="center" gutterBottom>
           Register
         </Typography>
+
         <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
@@ -71,17 +94,44 @@ export default function Register() {
             onChange={handleChange}
             margin="normal"
             required
+            autoComplete="off"
+            sx={{
+              "& input:-webkit-autofill": {
+                WebkitBoxShadow: "0 0 0 1000px white inset",
+                WebkitTextFillColor: "#000",
+              },
+            }}
           />
           <TextField
             fullWidth
-            type="password"
             name="password"
+            type={showPassword ? "text" : "password"}
             label="Password"
             value={form.password}
             onChange={handleChange}
             margin="normal"
             required
+            autoComplete="off"
+            sx={{
+              "& input:-webkit-autofill": {
+                WebkitBoxShadow: "0 0 0 1000px white inset",
+                WebkitTextFillColor: "#000",
+              },
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
+
           <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
             Register
           </Button>
