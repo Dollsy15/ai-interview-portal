@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema(
       mcq: { type: [Number], default: [] },
       coding: { type: [Number], default: [] },
     },
+    // ✅ Password reset fields
+    resetOTP: String,
+    resetOTPExpiry: Date,
+    refreshToken: String, // optional for JWT refresh
   },
   { timestamps: true }
 );

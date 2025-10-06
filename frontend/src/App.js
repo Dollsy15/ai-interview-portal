@@ -33,9 +33,13 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/coding" element={<CodingRound />} />
-              <Route path="/admin/submissions" element={<AdminSubmissions />} />
               <Route path="/mcq" element={<McqRound />} />
               <Route path="/behavioral" element={<BehavioralRound />} />
+            </Route>
+
+            {/* Admin-only route */}
+            <Route element={<ProtectedRoute roles={["admin"]} />}>
+              <Route path="/admin/submissions" element={<AdminSubmissions />} />
             </Route>
           </Routes>
         </div>

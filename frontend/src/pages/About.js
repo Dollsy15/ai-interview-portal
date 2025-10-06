@@ -51,7 +51,7 @@ export default function About() {
           </Typography>
 
           <Typography paragraph sx={{ lineHeight: 1.7 }}>
-            Built with ❤️ using React, Node.js, MongoDB, and AI-powered feedback
+            Built with ❤️ using React, Node.js, MongoDB and AI-powered feedback
             engines.
           </Typography>
 
