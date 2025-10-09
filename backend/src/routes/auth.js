@@ -3,9 +3,8 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const { jwtSecret } = require("../config");
+const { jwtSecret, jwtRefreshSecret } = require("../config");
 const authMiddleware = require("../middleware/authMiddleware");
-const sendEmail = require("../utils/sendEmail"); // email utility
 
 /**
  * ====================
@@ -15,11 +14,11 @@ const sendEmail = require("../utils/sendEmail"); // email utility
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    if (!name || !email || !password) {
+    if (!name || !email || !password)
       return res
         .status(400)
-        .json({ success: false, msg: "All fields are required" });
-    }
+        .json({ success: false, msg: "All fields required" });
+
     const existing = await User.findOne({ email });
     if (existing)
       return res
@@ -35,14 +34,20 @@ router.post("/register", async (req, res) => {
     });
     await newUser.save();
 
-    const token = jwt.sign({ id: newUser._id, role: newUser.role }, jwtSecret, {
-      expiresIn: "1d",
+    const accessToken = jwt.sign(
+      { id: newUser._id, role: newUser.role },
+      jwtSecret,
+      { expiresIn: "15m" }
+    );
+    const refreshToken = jwt.sign({ id: newUser._id }, jwtRefreshSecret, {
+      expiresIn: "7d",
     });
 
     res.status(201).json({
       success: true,
       msg: `${newUser.role} registered successfully ✅`,
-      token,
+      token: accessToken,
+      refreshToken,
       user: {
         id: newUser._id,
         name: newUser.name,
@@ -82,14 +87,18 @@ router.post("/login", async (req, res) => {
         .status(400)
         .json({ success: false, msg: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, jwtSecret, {
-      expiresIn: "1d",
+    const accessToken = jwt.sign({ id: user._id, role: user.role }, jwtSecret, {
+      expiresIn: "15m",
+    });
+    const refreshToken = jwt.sign({ id: user._id }, jwtRefreshSecret, {
+      expiresIn: "7d",
     });
 
     res.json({
       success: true,
       msg: "Login successful ✅",
-      token,
+      token: accessToken,
+      refreshToken,
       user: {
         id: user._id,
         name: user.name,
@@ -108,7 +117,7 @@ router.post("/login", async (req, res) => {
 
 /**
  * ====================
- *  FORGOT PASSWORD (Request OTP)
+ *  FORGOT PASSWORD (Dev Mode - OTP in console)
  * ====================
  */
 router.post("/forgot-password", async (req, res) => {
@@ -119,12 +128,12 @@ router.post("/forgot-password", async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.resetOTP = otp;
-    user.resetOTPExpiry = Date.now() + 10 * 60 * 1000; // 10 min
+    user.resetOTPExpiry = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    await sendEmail(user.email, "Password Reset OTP", `Your OTP is: ${otp}`);
+    console.log(`✅ OTP for ${email}: ${otp}`); // Dev mode
 
-    res.json({ msg: "OTP sent to your email ✅" });
+    res.json({ msg: "OTP generated! Check your console ✅" });
   } catch (err) {
     console.error("Forgot Password Error:", err.message);
     res.status(500).json({ msg: "Server Error", error: err.message });
@@ -133,7 +142,7 @@ router.post("/forgot-password", async (req, res) => {
 
 /**
  * ====================
- *  RESET PASSWORD (Verify OTP)
+ *  RESET PASSWORD
  * ====================
  */
 router.post("/reset-password", async (req, res) => {
@@ -154,6 +163,38 @@ router.post("/reset-password", async (req, res) => {
   } catch (err) {
     console.error("Reset Password Error:", err.message);
     res.status(500).json({ msg: "Server Error", error: err.message });
+  }
+});
+
+/**
+ * ====================
+ *  REFRESH TOKEN
+ * ====================
+ */
+router.post("/refresh-token", async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken)
+      return res.status(401).json({ msg: "No refresh token provided" });
+
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, jwtRefreshSecret);
+    if (!decoded.id)
+      return res.status(401).json({ msg: "Invalid refresh token" });
+
+    // Find user
+    const user = await User.findById(decoded.id).select("-password");
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    // Generate new access token
+    const accessToken = jwt.sign({ id: user._id, role: user.role }, jwtSecret, {
+      expiresIn: "15m",
+    });
+
+    res.json({ success: true, token: accessToken, user });
+  } catch (err) {
+    console.error("Refresh Token Error:", err.message);
+    res.status(401).json({ msg: "Refresh token invalid or expired" });
   }
 });
 
@@ -181,10 +222,7 @@ router.post("/score", authMiddleware, async (req, res) => {
 
     if (type === "mcq") user.scores.mcq.push(value);
     else if (type === "coding") user.scores.coding.push(value);
-    else
-      return res
-        .status(400)
-        .json({ msg: "Invalid type, must be mcq or coding" });
+    else return res.status(400).json({ msg: "Invalid type" });
 
     await user.save();
     res.json({ success: true, msg: "Score added ✅", scores: user.scores });
