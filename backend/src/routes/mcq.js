@@ -2,13 +2,15 @@ const express = require("express");
 const router = express.Router();
 const MCQ = require("../models/MCQ");
 const { getQuestions, submitAnswers } = require("../controllers/mcqController");
+const authMiddleware = require("../middleware/authMiddleware");
 
 // ✅ GET → fetch all MCQs from DB
-router.get("/", getQuestions);
+router.get("/", authMiddleware, getQuestions);
 
 // ✅ POST → submit answers and calculate score
-router.post("/submit", submitAnswers);
+router.post("/submit", authMiddleware, submitAnswers);
 
+// ✅ POST → add multiple MCQs (admin only)
 router.post("/add", async (req, res) => {
   try {
     const questions = req.body; // array of MCQs
