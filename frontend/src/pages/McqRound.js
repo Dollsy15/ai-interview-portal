@@ -7,19 +7,24 @@ import {
   FormControlLabel,
   Radio,
   CircularProgress,
+  Box,
+  Stack,
 } from "@mui/material";
-import { getMcqQuestions, addUserScore } from "../api";
+import { getMcqQuestions, submitMcqAnswers } from "../api";
 import { useNavigate } from "react-router-dom";
+import Timer from "../components/Timer";
+import ScoreCard from "../components/ScoreCard";
 
 export default function McqRound() {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
-  const [score, setScore] = useState(null);
+  const [scoreData, setScoreData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [timeSpent, setTimeSpent] = useState(0);
   const navigate = useNavigate();
 
-  // ✅ Fetch MCQ questions
+  // Fetch MCQ questions
   useEffect(() => {
     (async () => {
       try {
@@ -34,15 +39,15 @@ export default function McqRound() {
     })();
   }, []);
 
-  // ✅ Store selected option
+  // Store selected option
   const handleChange = (qId, value) => {
-    setAnswers({
-      ...answers,
+    setAnswers((prev) => ({
+      ...prev,
       [qId]: value,
-    });
+    }));
   };
 
-  // ✅ Submit quiz
+  // Submit quiz
   const handleSubmit = async () => {
     if (Object.keys(answers).length < questions.length) {
       alert("Please answer all questions before submitting!");
@@ -50,25 +55,13 @@ export default function McqRound() {
     }
 
     setSubmitting(true);
-    let calcScore = 0;
-
-    questions.forEach((q) => {
-      const userAns = answers[q._id] ?? "";
-      const correctAns = q.correctAnswer;
-      if (userAns === correctAns) {
-        calcScore++;
-      }
-    });
-
-    setScore(calcScore);
 
     try {
-      await addUserScore("mcq", calcScore);
-      alert(`Your MCQ Score: ${calcScore}/${questions.length}`);
-      navigate("/dashboard");
+      const response = await submitMcqAnswers({ answers, timeSpent });
+      setScoreData(response); // {score, total, details}
     } catch (err) {
-      console.error("❌ Failed to save score:", err);
-      alert("Failed to save your score. Please try again.");
+      console.error("❌ Failed to submit MCQs:", err);
+      alert("Failed to submit your answers. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -76,8 +69,8 @@ export default function McqRound() {
 
   if (loading) {
     return (
-      <div
-        style={{
+      <Box
+        sx={{
           minHeight: "100vh",
           display: "flex",
           justifyContent: "center",
@@ -85,19 +78,19 @@ export default function McqRound() {
         }}
       >
         <CircularProgress />
-      </div>
+      </Box>
     );
   }
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         minHeight: "100vh",
         backgroundImage:
           "url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1650&q=80')",
         backgroundSize: "cover",
         backgroundPosition: "center",
-        padding: "2rem",
+        p: 2,
         display: "flex",
         justifyContent: "center",
         alignItems: "flex-start",
@@ -109,57 +102,72 @@ export default function McqRound() {
           width: "100%",
           maxWidth: 700,
           minHeight: "400px",
-          background: "rgba(255,255,255,0.9)",
-          borderRadius: "12px",
+          background: "rgba(255,255,255,0.95)",
+          borderRadius: 2,
         }}
       >
-        <Typography variant="h4" gutterBottom>
-          MCQ Round
-        </Typography>
+        <Stack spacing={3}>
+          <Typography variant="h4">MCQ Round</Typography>
 
-        {questions.length === 0 ? (
-          <Typography variant="h6">
-            No questions available. Please check the database.
-          </Typography>
-        ) : score === null ? (
-          <>
-            {questions.map((q, index) => (
-              <div key={q._id} style={{ marginBottom: "1.5rem" }}>
-                <Typography variant="h6">
-                  {index + 1}. {q.question}
-                </Typography>
-                <RadioGroup
-                  value={answers[q._id] ?? ""}
-                  onChange={(e) => handleChange(q._id, e.target.value)}
-                >
-                  {q.options.map((opt, i) => (
-                    <FormControlLabel
-                      key={i}
-                      value={opt}
-                      control={<Radio />}
-                      label={opt}
-                    />
-                  ))}
-                </RadioGroup>
-              </div>
-            ))}
+          <Timer onTimeUpdate={setTimeSpent} />
 
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSubmit}
-              sx={{ mt: 2 }}
-              disabled={submitting}
-            >
-              {submitting ? "Submitting..." : "Submit"}
-            </Button>
-          </>
-        ) : (
-          <Typography variant="h5">
-            ✅ You scored {score}/{questions.length} marks 🎉
-          </Typography>
-        )}
+          {questions.length === 0 ? (
+            <Typography variant="h6">
+              No questions available. Please check the database.
+            </Typography>
+          ) : (
+            <Stack spacing={2}>
+              {questions.map((q, index) => (
+                <Box key={q._id}>
+                  <Typography variant="h6" gutterBottom>
+                    {index + 1}. {q.question}
+                  </Typography>
+
+                  {q.options && q.options.length > 0 ? (
+                    <RadioGroup
+                      value={answers[q._id] ?? ""}
+                      onChange={(e) => handleChange(q._id, e.target.value)}
+                    >
+                      {q.options.map((opt, i) => (
+                        <FormControlLabel
+                          key={i}
+                          value={opt}
+                          control={<Radio />}
+                          label={opt}
+                        />
+                      ))}
+                    </RadioGroup>
+                  ) : (
+                    <Typography color="error">No options available.</Typography>
+                  )}
+                </Box>
+              ))}
+
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSubmit}
+                disabled={submitting}
+              >
+                {submitting ? "Submitting..." : "Submit"}
+              </Button>
+            </Stack>
+          )}
+
+          {scoreData && (
+            <ScoreCard
+              open={!!scoreData}
+              onClose={() => {
+                setScoreData(null);
+                navigate("/dashboard");
+              }}
+              score={scoreData.score}
+              total={scoreData.total}
+              details={scoreData.details}
+            />
+          )}
+        </Stack>
       </Paper>
-    </div>
+    </Box>
   );
 }

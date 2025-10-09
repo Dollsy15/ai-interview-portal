@@ -8,20 +8,23 @@ import {
   Button,
   Stack,
 } from "@mui/material";
-import { getMcqQuestions } from "../api";
+import { getMcqQuestions, submitMcqAnswers } from "../api";
+import Timer from "../components/Timer";
+import ScoreCard from "./ScoreCard";
 
 export default function Mcq() {
   const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [answers, setAnswers] = useState({}); // {questionId: selectedOption}
-  const [score, setScore] = useState(null); // ✅ store final score
+  const [scoreData, setScoreData] = useState(null);
+  const [timeSpent, setTimeSpent] = useState(0);
 
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const data = await getMcqQuestions();
-        setQuestions(data);
+        setQuestions(data.questions || []);
       } catch (err) {
         setError("Failed to load questions.");
       } finally {
@@ -35,33 +38,32 @@ export default function Mcq() {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
-  const handleSubmit = () => {
-    let newScore = 0;
+  const handleSubmit = async () => {
+    if (Object.keys(answers).length < questions.length) {
+      alert("Please answer all questions before submitting!");
+      return;
+    }
 
-    questions.forEach((q) => {
-      if (answers[q._id] === q.answer) {
-        newScore++;
-      }
-    });
-
-    setScore(newScore);
-    console.log("User Answers:", answers);
+    try {
+      const response = await submitMcqAnswers({ answers, timeSpent });
+      setScoreData(response);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit answers.");
+    }
   };
 
   if (loading)
     return <Typography textAlign="center">Loading MCQs...</Typography>;
-  if (error)
-    return (
-      <Typography color="error" textAlign="center">
-        {error}
-      </Typography>
-    );
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
     <Stack spacing={3} sx={{ p: 4 }}>
       <Typography variant="h5" textAlign="center">
         MCQ Round
       </Typography>
+
+      <Timer onTimeUpdate={setTimeSpent} />
 
       {questions.map((q, index) => (
         <Paper key={q._id || index} sx={{ p: 2 }}>
@@ -88,10 +90,14 @@ export default function Mcq() {
         Submit Answers
       </Button>
 
-      {score !== null && (
-        <Typography variant="h6" textAlign="center" sx={{ mt: 2 }}>
-          🎉 You scored {score} out of {questions.length}
-        </Typography>
+      {scoreData && (
+        <ScoreCard
+          open={!!scoreData}
+          onClose={() => setScoreData(null)}
+          score={scoreData.score}
+          total={scoreData.total}
+          details={scoreData.details}
+        />
       )}
     </Stack>
   );

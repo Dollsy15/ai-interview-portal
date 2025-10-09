@@ -40,6 +40,8 @@ export const addUserScore = (type, value) =>
 
 // MCQ
 export const getMcqQuestions = () => API.get("/mcq").then((res) => res.data);
+export const submitMcqAnswers = (data) =>
+  API.post("/mcq/submit", data).then((res) => res.data); // <-- Added this
 
 // CODING
 export const getCodingQuestions = () =>
