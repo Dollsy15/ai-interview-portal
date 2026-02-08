@@ -5,12 +5,14 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const auth = require("./middleware/auth");
+const questionRoutes = require("./routes/questionRoutes");
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/api/questions", questionRoutes);
 
 // --------------------
 // MongoDB Connection
