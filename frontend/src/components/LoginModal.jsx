@@ -1,6 +1,47 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+const overlayStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: "rgba(0,0,0,0.5)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+};
+
+const modalStyle = {
+  backgroundColor: "#fff",
+  padding: "30px",
+  borderRadius: "10px",
+  minWidth: "300px",
+  boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
+};
+
+const inputStyle = {
+  width: "100%",
+  margin: "10px 0",
+  padding: "8px",
+  fontSize: "16px",
+  borderRadius: "4px",
+  border: "1px solid #ccc",
+};
+
+const buttonStyle = {
+  padding: "10px 20px",
+  marginTop: "10px",
+  cursor: "pointer",
+  borderRadius: "4px",
+  border: "none",
+  backgroundColor: "#007bff",
+  color: "#fff",
+  fontSize: "16px",
+};
+
 const LoginModal = ({ show, onClose }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
