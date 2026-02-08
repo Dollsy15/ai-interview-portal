@@ -19,7 +19,8 @@ const Dashboard = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setUserData(res.data);
+
+        setUserData(res.data); // { message, user }
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load dashboard");
       }
@@ -29,13 +30,19 @@ const Dashboard = () => {
   }, []);
 
   if (error) return <h3 style={{ color: "red" }}>{error}</h3>;
-
   if (!userData) return <h3>Loading...</h3>;
 
   return (
     <div style={{ padding: "40px" }}>
       <h2>Dashboard</h2>
-      <p>Welcome, user ID: {userData.user.id}</p>
+      <p>
+        Welcome,{" "}
+        {userData.user?.email
+          ? userData.user.email
+          : userData.user?.id
+            ? `User ID: ${userData.user.id}`
+            : "User"}
+      </p>
       <p>{userData.message}</p>
 
       <button
