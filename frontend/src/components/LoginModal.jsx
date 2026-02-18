@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const overlayStyle = {
   position: "fixed",
@@ -47,6 +48,7 @@ const LoginModal = ({ show, onClose }) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate(); 
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -61,10 +63,19 @@ const LoginModal = ({ show, onClose }) => {
         password,
       });
 
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+
       alert(res.data.message || "Login successful");
+
       setEmail("");
       setPassword("");
+
       onClose();
+
+      // redirect to dashboard
+      navigate("/dashboard");
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
     } finally {

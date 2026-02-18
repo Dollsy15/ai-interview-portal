@@ -11,6 +11,7 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    console.log("Login button clicked");  //
 
     if (!email || !password) {
       alert("Please fill all fields");
@@ -23,11 +24,19 @@ const Login = () => {
         password,
       });
 
-      alert(res.data.message);
+      console.log(res.data);
+
+      // Directly store token
+      localStorage.setItem("token", res.data.token);
+
+      // Clear fields
       setEmail("");
       setPassword("");
+
+      // Redirect to dashboard
+      navigate("/dashboard");
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
+      alert("Login failed");
     }
   };
 
@@ -82,9 +91,8 @@ const Login = () => {
         <br />
         <br />
 
-        <input
+        <button
           type="submit"
-          value="Login"
           style={{
             padding: "10px 25px",
             borderRadius: "8px",
@@ -95,7 +103,9 @@ const Login = () => {
             backgroundColor: "#f5f5f5",
             color: "black",
           }}
-        />
+        >
+          Login
+        </button>
 
         <input
           type="button"
