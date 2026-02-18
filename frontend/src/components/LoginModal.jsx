@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const overlayStyle = {
   position: "fixed",
@@ -15,37 +16,37 @@ const overlayStyle = {
 };
 
 const modalStyle = {
-  backgroundColor: "#fff",
-  padding: "30px",
-  borderRadius: "10px",
-  minWidth: "300px",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
+  backgroundColor: "#ffffff",
+  padding: "35px",
+  borderRadius: "12px",
+  width: "340px",
+  maxWidth: "90%",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
 };
 
 const inputStyle = {
   width: "100%",
   margin: "10px 0",
-  padding: "8px",
+  padding: "10px 12px",
   fontSize: "16px",
-  borderRadius: "4px",
+  borderRadius: "6px",
   border: "1px solid #ccc",
+  backgroundColor: "#ffffff",
+  boxSizing: "border-box",
+  outline: "none",
 };
 
 const buttonStyle = {
   padding: "10px 20px",
   marginTop: "10px",
-  cursor: "pointer",
-  borderRadius: "4px",
-  border: "none",
-  backgroundColor: "#007bff",
-  color: "#fff",
-  fontSize: "16px",
+  marginRight: "10px",
 };
 
 const LoginModal = ({ show, onClose }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -86,13 +87,34 @@ const LoginModal = ({ show, onClose }) => {
           style={inputStyle}
         />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={inputStyle}
-        />
+        <div style={{ position: "relative", width: "100%" }}>
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{
+              ...inputStyle,
+              paddingRight: "45px",
+              backgroundColor: "#ffffff",
+            }}
+          />
+
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              cursor: "pointer",
+              color: "#555",
+              fontSize: "20px",
+            }}
+          >
+            {showPassword ? <FiEyeOff /> : <FiEye />}
+          </span>
+        </div>
 
         <button onClick={handleLogin} disabled={loading} style={buttonStyle}>
           {loading ? "Logging in..." : "Login"}
