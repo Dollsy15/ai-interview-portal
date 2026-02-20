@@ -7,6 +7,7 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [questions, setQuestions] = useState([]);
   const navigate = useNavigate();
+  const [answers, setAnswers] = useState({});
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -52,10 +53,6 @@ const Dashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
-  };
-
-  const handleQuestionClick = (question) => {
-    alert(question);
   };
 
   if (error) return <h3 style={{ color: "red" }}>{error}</h3>;
@@ -169,23 +166,36 @@ const Dashboard = () => {
             questions.map((q) => (
               <div
                 key={q._id || q.id}
-                onClick={() => handleQuestionClick(q.question)}
                 style={{
                   background: "#ffffff",
                   padding: "20px",
                   borderRadius: "12px",
                   boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
-                  cursor: "pointer",
                   transition: "0.3s",
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.transform = "translateY(-5px)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.transform = "translateY(0)")
-                }
               >
-                {q.question}
+                <p style={{ fontWeight: "600", marginBottom: "10px" }}>
+                  {q.question}
+                </p>
+
+                <textarea
+                  placeholder="Write your answer here..."
+                  value={answers[q._id || q.id] || ""}
+                  onChange={(e) =>
+                    setAnswers((prev) => ({
+                      ...prev,
+                      [q._id || q.id]: e.target.value,
+                    }))
+                  }
+                  style={{
+                    width: "100%",
+                    minHeight: "100px",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    border: "1px solid #ddd",
+                    resize: "vertical",
+                  }}
+                />
               </div>
             ))
           )}
