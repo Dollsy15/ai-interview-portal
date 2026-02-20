@@ -18,9 +18,24 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    stats: {
+      interviewsTaken: {
+        type: Number,
+        default: 0,
+      },
+      avgScore: {
+        type: Number,
+        default: 0,
+      },
+      questionsPracticed: {
+        type: Number,
+        default: 0,
+      },
+    },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Prevent OverwriteModelError
-module.exports = mongoose.models.User || mongoose.model("User", userSchema);
+module.exports =
+  mongoose.models.User || mongoose.model("User", userSchema);

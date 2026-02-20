@@ -55,6 +55,27 @@ const Dashboard = () => {
     navigate("/login");
   };
 
+  const submitAnswers = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.post(
+        "http://localhost:5000/api/submit-answers",
+        { answers },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      alert(`Your Score: ${res.data.score}`);
+
+      // Refresh dashboard stats
+      window.location.reload();
+    } catch (err) {
+      alert("Error submitting answers");
+    }
+  };
+
   if (error) return <h3 style={{ color: "red" }}>{error}</h3>;
   if (!userData) return <h3>Loading user info...</h3>;
 
@@ -200,6 +221,25 @@ const Dashboard = () => {
             ))
           )}
         </div>
+
+        {questions.length > 0 && (
+          <div style={{ textAlign: "center", marginTop: "30px" }}>
+            <button
+              onClick={submitAnswers}
+              style={{
+                padding: "14px 30px",
+                background: "#4a6cf7",
+                border: "none",
+                borderRadius: "8px",
+                color: "#fff",
+                fontSize: "16px",
+                cursor: "pointer",
+              }}
+            >
+              Submit Answers
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Stats Section */}
@@ -213,9 +253,20 @@ const Dashboard = () => {
         }}
       >
         {[
-          { label: "Interviews Taken", value: 12 },
-          { label: "Avg. Score", value: "82%" },
-          { label: "Questions Practiced", value: questions.length },
+          {
+            label: "Interviews Taken",
+            value: userData.user?.stats?.interviewsTaken || 0,
+          },
+          {
+            label: "Avg. Score",
+            value: userData.user?.stats?.avgScore
+              ? userData.user.stats.avgScore.toFixed(1) + "%"
+              : "0%",
+          },
+          {
+            label: "Questions Practiced",
+            value: userData.user?.stats?.questionsPracticed || 0,
+          },
         ].map((stat, i) => (
           <div
             key={i}
