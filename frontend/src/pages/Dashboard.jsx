@@ -23,9 +23,14 @@ const Dashboard = () => {
         setUserData(userRes.data);
 
         const questionsRes = await axios.get(
-          "http://localhost:5000/api/questions"
+          "http://localhost:5000/api/questions",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
-        setQuestions(questionsRes.data);
+        setQuestions(questionsRes.data.questions || questionsRes.data);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load dashboard");
       }
@@ -38,9 +43,7 @@ const Dashboard = () => {
   if (!userData) return <h3>Loading user info...</h3>;
 
   const userName =
-    userData.user?.name ||
-    userData.user?.email?.split("@")[0] ||
-    "User";
+    userData.user?.name || userData.user?.email?.split("@")[0] || "User";
 
   return (
     <div
@@ -97,7 +100,11 @@ const Dashboard = () => {
         {/* Left */}
         <div style={{ maxWidth: "550px" }}>
           <h1 style={{ fontSize: "40px", marginBottom: "15px" }}>
-            Welcome back, <span style={{ color: "#4a6cf7" }}> {userData.user?.name || "User"}! </span>
+            Welcome back,{" "}
+            <span style={{ color: "#4a6cf7" }}>
+              {" "}
+              {userData.user?.name || "User"}!{" "}
+            </span>
           </h1>
           <p style={{ fontSize: "18px", color: "#555" }}>
             Continue your AI-powered interview preparation and improve your
