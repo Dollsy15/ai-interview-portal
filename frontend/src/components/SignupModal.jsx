@@ -3,6 +3,7 @@ import axios from "axios";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const SignupModal = ({ show, onClose }) => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -11,7 +12,7 @@ const SignupModal = ({ show, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!name || !email || !password) {
       alert("Please fill all fields");
       return;
     }
@@ -24,6 +25,7 @@ const SignupModal = ({ show, onClose }) => {
     try {
       setLoading(true);
       const res = await axios.post("http://localhost:5000/signup", {
+        name, 
         email,
         password,
       });
@@ -47,6 +49,14 @@ const SignupModal = ({ show, onClose }) => {
         <h2>Signup</h2>
 
         <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Enter your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={inputStyle}
+          />
+
           <input
             type="email"
             placeholder="Email"

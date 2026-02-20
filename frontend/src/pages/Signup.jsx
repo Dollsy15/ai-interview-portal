@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 
 const Signup = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +17,7 @@ const Signup = () => {
 
     try {
       const res = await axios.post("http://localhost:5000/signup", {
+        name,
         email,
         password,
       });
@@ -33,6 +35,13 @@ const Signup = () => {
       <h2>Signup</h2>
 
       <form onSubmit={handleSignup}>
+        <input
+          type="text"
+          placeholder="Enter your name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
         <input
           type="email"
           placeholder="Email"

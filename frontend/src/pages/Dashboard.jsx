@@ -54,7 +54,6 @@ const Dashboard = () => {
         background: "linear-gradient(120deg, #f5f7fa, #e4e9f7)",
       }}
     >
-      {/* Navbar */}
       <div
         style={{
           padding: "20px 50px",
@@ -85,7 +84,6 @@ const Dashboard = () => {
         </button>
       </div>
 
-      {/* Hero Section */}
       <div
         style={{
           flex: 1,
@@ -100,11 +98,7 @@ const Dashboard = () => {
         {/* Left */}
         <div style={{ maxWidth: "550px" }}>
           <h1 style={{ fontSize: "40px", marginBottom: "15px" }}>
-            Welcome back,{" "}
-            <span style={{ color: "#4a6cf7" }}>
-              {" "}
-              {userData.user?.name || "User"}!{" "}
-            </span>
+            Welcome back, <span style={{ color: "#4a6cf7" }}>{userName}!</span>
           </h1>
           <p style={{ fontSize: "18px", color: "#555" }}>
             Continue your AI-powered interview preparation and improve your
@@ -129,7 +123,6 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* Right Image */}
         <img
           src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png"
           alt="AI Bot"
@@ -140,7 +133,6 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Practice Section */}
       <div style={{ padding: "40px 80px" }}>
         <h2 style={{ marginBottom: "25px" }}>Practice Questions</h2>
 
