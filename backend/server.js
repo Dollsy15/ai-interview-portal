@@ -97,7 +97,10 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
 
     const token = jwt.sign(
-      { userId: user._id }, // 🔥 must match auth middleware
+      {
+        userId: user._id,
+        username: user.name, // 👈 add this
+      },
       process.env.JWT_SECRET,
       { expiresIn: "1h" },
     );
