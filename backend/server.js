@@ -4,11 +4,12 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const interviewRoutes = require("./routes/interview");
 
 const auth = require("./middleware/auth");
 const questionRoutes = require("./routes/questionRoutes");
 const authRoutes = require("./routes/authRoutes");
-const User = require("./models/User"); // ✅ Import model properly
+const User = require("./models/User");
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 
 app.use("/api/questions", questionRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api", interviewRoutes);
 
 // --------------------
 // MongoDB Connection

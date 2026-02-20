@@ -1,43 +1,62 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState("");
   const [questions, setQuestions] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboard = async () => {
       const token = localStorage.getItem("token");
+
       if (!token) {
-        setError("Not authorized. Please login.");
+        navigate("/login");
         return;
       }
 
       try {
         const userRes = await axios.get("http://localhost:5000/dashboard", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
+
         setUserData(userRes.data);
 
         const questionsRes = await axios.get(
           "http://localhost:5000/api/questions",
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           },
         );
+
         setQuestions(questionsRes.data.questions || questionsRes.data);
       } catch (err) {
-        setError(err.response?.data?.message || "Failed to load dashboard");
+        if (err.response?.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/login");
+        } else {
+          setError(err.response?.data?.message || "Failed to load dashboard");
+        }
       }
     };
 
     fetchDashboard();
-  }, []);
+  }, [navigate]);
+
+  const handleStartInterview = () => {
+    navigate("/interview");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  const handleQuestionClick = (question) => {
+    alert(question);
+  };
 
   if (error) return <h3 style={{ color: "red" }}>{error}</h3>;
   if (!userData) return <h3>Loading user info...</h3>;
@@ -54,6 +73,7 @@ const Dashboard = () => {
         background: "linear-gradient(120deg, #f5f7fa, #e4e9f7)",
       }}
     >
+      {/* Header */}
       <div
         style={{
           padding: "20px 50px",
@@ -65,11 +85,9 @@ const Dashboard = () => {
         }}
       >
         <h2 style={{ color: "#4a6cf7" }}>AI Interview Portal</h2>
+
         <button
-          onClick={() => {
-            localStorage.removeItem("token");
-            window.location.reload();
-          }}
+          onClick={handleLogout}
           style={{
             padding: "10px 18px",
             background: "#ff4d4f",
@@ -84,6 +102,7 @@ const Dashboard = () => {
         </button>
       </div>
 
+      {/* Main Section */}
       <div
         style={{
           flex: 1,
@@ -95,17 +114,18 @@ const Dashboard = () => {
           flexWrap: "wrap",
         }}
       >
-        {/* Left */}
         <div style={{ maxWidth: "550px" }}>
           <h1 style={{ fontSize: "40px", marginBottom: "15px" }}>
             Welcome back, <span style={{ color: "#4a6cf7" }}>{userName}!</span>
           </h1>
+
           <p style={{ fontSize: "18px", color: "#555" }}>
             Continue your AI-powered interview preparation and improve your
             confidence with real-world questions.
           </p>
 
           <button
+            onClick={handleStartInterview}
             style={{
               marginTop: "25px",
               padding: "14px 30px",
@@ -116,7 +136,6 @@ const Dashboard = () => {
               fontSize: "16px",
               cursor: "pointer",
               boxShadow: "0 8px 20px rgba(74,108,247,0.3)",
-              transition: "0.3s",
             }}
           >
             Start Interview
@@ -133,6 +152,7 @@ const Dashboard = () => {
         />
       </div>
 
+      {/* Questions Section */}
       <div style={{ padding: "40px 80px" }}>
         <h2 style={{ marginBottom: "25px" }}>Practice Questions</h2>
 
@@ -148,14 +168,15 @@ const Dashboard = () => {
           ) : (
             questions.map((q) => (
               <div
-                key={q.id}
+                key={q._id || q.id}
+                onClick={() => handleQuestionClick(q.question)}
                 style={{
                   background: "#ffffff",
                   padding: "20px",
                   borderRadius: "12px",
                   boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
-                  transition: "0.3s",
                   cursor: "pointer",
+                  transition: "0.3s",
                 }}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.transform = "translateY(-5px)")
@@ -182,9 +203,9 @@ const Dashboard = () => {
         }}
       >
         {[
-          { label: "Interviews Taken", value: "12" },
+          { label: "Interviews Taken", value: 12 },
           { label: "Avg. Score", value: "82%" },
-          { label: "Questions Practiced", value: "45" },
+          { label: "Questions Practiced", value: questions.length },
         ].map((stat, i) => (
           <div
             key={i}
@@ -216,7 +237,6 @@ const Dashboard = () => {
         <p>© 2026 AI Interview Portal. All rights reserved.</p>
       </footer>
 
-      {/* Animation */}
       <style>
         {`
           @keyframes float {
